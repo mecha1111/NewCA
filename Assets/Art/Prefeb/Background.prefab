@@ -558,7 +558,6 @@ GameObject:
   - component: {fileID: 1978106352469982438}
   - component: {fileID: 7725596769915710548}
   - component: {fileID: 749632326639401607}
-  - component: {fileID: 4628662519126302166}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -578,6 +577,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 871090049659123022}
   - {fileID: 8427957753271411465}
   - {fileID: 8911121540727526639}
   - {fileID: 3598804220690693615}
@@ -587,7 +587,6 @@ RectTransform:
   - {fileID: 5177079322334908339}
   - {fileID: 8345557635874429777}
   - {fileID: 6805563359405737804}
-  - {fileID: 871090049659123022}
   m_Father: {fileID: 1840997540750334879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -642,23 +641,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
---- !u!114 &4628662519126302166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1987860376923758328}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &2752139122589610032
 GameObject:
   m_ObjectHideFlags: 0
@@ -2117,7 +2099,7 @@ Canvas:
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
-  m_OverrideSorting: 1
+  m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
@@ -2137,6 +2119,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1840997540750334879}
   - component: {fileID: 810201306616170934}
+  - component: {fileID: 8960724046071944346}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -2144,14 +2127,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1840997540750334879
-Transform:
+--- !u!224 &1840997540750334879
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6599463592699233169}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -2169,6 +2151,11 @@ Transform:
   - {fileID: 1978106352469982438}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 10, y: 13.99}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &810201306616170934
 SpriteRenderer:
   serializedVersion: 2
@@ -2228,6 +2215,20 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &8960724046071944346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6599463592699233169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &8514995185023057760
 GameObject:
   m_ObjectHideFlags: 0

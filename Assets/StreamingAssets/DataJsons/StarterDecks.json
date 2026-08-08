@@ -104,13 +104,13 @@
           "count": 1
         },
         {
-          "cardId": "I13",
-          "cardType": "Item",
+          "cardId": "S07",
+          "cardType": "Skill",
           "count": 1
         },
         {
-          "cardId": "I14",
-          "cardType": "Item",
+          "cardId": "S13",
+          "cardType": "Skill",
           "count": 1
         }
       ]
