@@ -1,0 +1,686 @@
+{
+  "skills": [
+    {
+      "id": "S01",
+      "name": "치고 빠자기",
+      "weaponType": "공용",
+      "speed": 4,
+      "skill1Cost": 0,
+      "skill1Effect": "데미지 2, 이전에 사용된 스킬이 있으면 실패."
+    },
+    {
+      "id": "S02",
+      "name": "처절한 저항",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 0,
+      "skill1Effect": "(노예족 전용)데미지 2"
+    },
+    {
+      "id": "S03",
+      "name": "재빠른 추격",
+      "weaponType": "공용",
+      "speed": 5,
+      "skill1Cost": 0,
+      "skill1Effect": "(추격자 전용) 데미지 1, 엑셀로 사용시 2회 공격"
+    },
+    {
+      "id": "S04",
+      "name": "어수선한 분위기",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 1,
+      "skill1Effect": "카드 한 장을 버리고 한 장 드로우"
+    },
+    {
+      "id": "S05",
+      "name": "펀치",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 1,
+      "skill1Effect": "데미지 1, 이전에 사용한 스킬이 있을시 데미지 +1"
+    },
+    {
+      "id": "S06",
+      "name": "회복",
+      "weaponType": "공용",
+      "speed": 4,
+      "skill1Cost": 1,
+      "skill1Effect": "HP 1 회복"
+    },
+    {
+      "id": "S07",
+      "name": "공격",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "데미지 2"
+    },
+    {
+      "id": "S08",
+      "name": "시원한 맥주",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "HP 2 회복"
+    },
+    {
+      "id": "S09",
+      "name": "테이블에 숨기",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "방어도 3"
+    },
+    {
+      "id": "S10",
+      "name": "의자 던지기",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "데미지 2"
+    },
+    {
+      "id": "S11",
+      "name": "엉터리 정보",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "아군 캐릭터 1명의 순서를 바꿀 수 있다.(선술집 주인 전용)"
+    },
+    {
+      "id": "S12",
+      "name": "숲의 순환",
+      "weaponType": "악기",
+      "speed": 1,
+      "skill1Cost": 2,
+      "skill1Effect": "덱에서 1장 드로우 패에서 1장 코스트 존으로 내려놓기"
+    },
+    {
+      "id": "S13",
+      "name": "카운터",
+      "weaponType": "공용",
+      "speed": 2,
+      "skill1Cost": 4,
+      "skill1Effect": "이번턴에 받은 데미지를 리치 내의 적 1명에게 줌"
+    },
+    {
+      "id": "S14",
+      "name": "방어",
+      "weaponType": "공용",
+      "speed": 5,
+      "skill1Cost": 3,
+      "skill1Effect": "방어도 3"
+    },
+    {
+      "id": "S15",
+      "name": "인듀어 페인",
+      "weaponType": "공용",
+      "speed": 5,
+      "skill1Cost": 3,
+      "skill1Effect": "아군 전체 방어력 2"
+    },
+    {
+      "id": "S16",
+      "name": "힐",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "캐릭터 1명의 HP 회복 3"
+    },
+    {
+      "id": "S17",
+      "name": "전직의 시간",
+      "weaponType": "공용",
+      "speed": 5,
+      "skill1Cost": 4,
+      "skill1Effect": "덱에서 전직 캐릭터 카드 1장을 패로 가져온다."
+    },
+    {
+      "id": "S18",
+      "name": "방어태세",
+      "weaponType": "공용",
+      "speed": 5,
+      "skill1Cost": 5,
+      "skill1Effect": "방어도 5"
+    },
+    {
+      "id": "S19",
+      "name": "강타",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 5,
+      "skill1Effect": "데미지 3,  1번자리의 캐릭터를 공격했을 경우 데미지 +1"
+    },
+    {
+      "id": "S20",
+      "name": "잔혹한 운명",
+      "weaponType": "공용",
+      "speed": 1,
+      "skill1Cost": 6,
+      "skill1Effect": "(노예 종족 전용) 데미지 8, 자신 사망",
+      "skill2Cost": 6,
+      "skill2Effect": "(추격자 종족 전용) 데미지 8을 주고 아군 전체에게 2 데미지"
+    },
+    {
+      "id": "S21",
+      "name": "머리 박기",
+      "weaponType": "공용",
+      "speed": 3,
+      "skill1Cost": 6,
+      "skill1Effect": "데미지 3,  방어도가 2 이상이면 데미지 +2"
+    },
+    {
+      "id": "S22",
+      "name": "건배!",
+      "weaponType": "공용",
+      "speed": 4,
+      "skill1Cost": 6,
+      "skill1Effect": "데미지 4,  아군이 3명 이상이면 데미지 +1"
+    },
+    {
+      "id": "S23",
+      "name": "깽판치기",
+      "weaponType": "공용",
+      "speed": 1,
+      "skill1Cost": 7,
+      "skill1Effect": "자신 데미지 1,  데미지 5,  카드 1장 드로우"
+    },
+    {
+      "id": "S24",
+      "name": "조율",
+      "weaponType": "악기",
+      "speed": 5,
+      "skill1Cost": 8,
+      "skill1Effect": "원하는 만큼 코스트존에 있는 카드와 패에 있는 카드를 선택하여 교환"
+    },
+    {
+      "id": "S25",
+      "name": "신념의 일격",
+      "weaponType": "두손검",
+      "speed": 2,
+      "skill1Cost": 1,
+      "skill1Effect": "데미지 2"
+    },
+    {
+      "id": "S26",
+      "name": "해방의 분노",
+      "weaponType": "두손검",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "데미지 3"
+    },
+    {
+      "id": "S27",
+      "name": "결사의 돌진",
+      "weaponType": "두손검",
+      "speed": 2,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 2, - 상대의 HP가 5 이하일 때 데미지 +2"
+    },
+    {
+      "id": "S28",
+      "name": "해방의 일격",
+      "weaponType": "두손검",
+      "speed": 3,
+      "skill1Cost": 5,
+      "skill1Effect": "데미지 4, - 상대의 HP가 5이하일 때 데미지 +4"
+    },
+    {
+      "id": "S29",
+      "name": "전력 방어",
+      "weaponType": "방패",
+      "speed": 4,
+      "skill1Cost": 2,
+      "skill1Effect": "방어도 2, 리치 내 아군의 데미지를 대신 받는다."
+    },
+    {
+      "id": "S30",
+      "name": "젊은이들의 시간",
+      "weaponType": "방패",
+      "speed": 4,
+      "skill1Cost": 2,
+      "skill1Effect": "방어도 4"
+    },
+    {
+      "id": "S31",
+      "name": "철의 의지",
+      "weaponType": "방패",
+      "speed": 5,
+      "skill1Cost": 3,
+      "skill1Effect": "본인에게 방어도 6"
+    },
+    {
+      "id": "S32",
+      "name": "피의 방패",
+      "weaponType": "방패",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "아군 캐릭터 한명을 지정하여 발동. 지정한 캐릭터가 최대체력이면 방어도 3부여 최대체력이 아니면 체력1회복, 방어도 2부여"
+    },
+    {
+      "id": "S33",
+      "name": "성스러운 마력화살",
+      "weaponType": "스태프",
+      "speed": 2,
+      "skill1Cost": 2,
+      "skill1Effect": "관통 데미지 2, 자신은 패에서 카드 1장을 버린다."
+    },
+    {
+      "id": "S34",
+      "name": "마법공격",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 4"
+    },
+    {
+      "id": "S35",
+      "name": "낙뢰",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "번개 속성 데미지 3"
+    },
+    {
+      "id": "S36",
+      "name": "몰아치는 파도",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "물 속성 데미지 3"
+    },
+    {
+      "id": "S37",
+      "name": "스피릿 오브 실프",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "바람 속성 데미지 3"
+    },
+    {
+      "id": "S38",
+      "name": "운디네의 가호",
+      "weaponType": "스태프",
+      "speed": 2,
+      "skill1Cost": 4,
+      "skill1Effect": "모든 아군의 HP 회복 1과 방어도 2"
+    },
+    {
+      "id": "S39",
+      "name": "절망의 저주",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "리치내 모든 적군에게 데미지 2"
+    },
+    {
+      "id": "S40",
+      "name": "스태프 공격",
+      "weaponType": "스태프",
+      "speed": 2,
+      "skill1Cost": 5,
+      "skill1Effect": "카드 1장을 버리고 리치 내 HP가 가장 높은 적에게 데미지 7"
+    },
+    {
+      "id": "S41",
+      "name": "브레이크",
+      "weaponType": "스태프",
+      "speed": 5,
+      "skill1Cost": 6,
+      "skill1Effect": "얼음 속성 데미지 2,  다음의 버프 부여 [버프] 1턴 동안 행동불가"
+    },
+    {
+      "id": "S42",
+      "name": "바람의 손길",
+      "weaponType": "스태프",
+      "speed": 5,
+      "skill1Cost": 6,
+      "skill1Effect": "바람 속성 데미지 2,  다음의 버프 부여 [버프] 속성공격을 받으면 자신의 앞뒤 캐릭터 데미지 1"
+    },
+    {
+      "id": "S43",
+      "name": "샐러맨더의 포옹",
+      "weaponType": "스태프",
+      "speed": 4,
+      "skill1Cost": 6,
+      "skill1Effect": "화염 속성 데미지 2,  다음의 버프 부여 [버프] 2턴 동안 엔드페이즈에 데미지 1"
+    },
+    {
+      "id": "S44",
+      "name": "아포칼립스",
+      "weaponType": "스태프",
+      "speed": 4,
+      "skill1Cost": 6,
+      "skill1Effect": "2의 화염 속성 데미지를 줌, 빙결된 적에게 명중시 데미지 +2, 관통효과 부여"
+    },
+    {
+      "id": "S45",
+      "name": "노움의 숨결",
+      "weaponType": "스태프",
+      "speed": 3,
+      "skill1Cost": 6,
+      "skill1Effect": "흙 속성 데미지 3,  다음의 버프 부여 [버프] 1턴 동안 엑셀 불가"
+    },
+    {
+      "id": "S46",
+      "name": "익스플로전",
+      "weaponType": "스태프",
+      "speed": 2,
+      "skill1Cost": 7,
+      "skill1Effect": "데미지 6,  그 양 옆으로 캐릭터 데미지 3"
+    },
+    {
+      "id": "S47",
+      "name": "크래시 피버",
+      "weaponType": "스태프",
+      "speed": 2,
+      "skill1Cost": 8,
+      "skill1Effect": "리치 내 모든 적에게 관통 데미지 4, 상대의 패 1장 트래시"
+    },
+    {
+      "id": "S48",
+      "name": "마력 해방",
+      "weaponType": "스태프",
+      "speed": 5,
+      "skill1Cost": 9,
+      "skill1Effect": "모든 스태프 스킬의 코스트를 0으로 함"
+    },
+    {
+      "id": "S49",
+      "name": "무차별 사격",
+      "weaponType": "스태프, 활",
+      "speed": 3,
+      "skill1Cost": 1,
+      "skill1Effect": "리치내 모든 캐릭터에게 데미지 1"
+    },
+    {
+      "id": "S50",
+      "name": "결정의 일격",
+      "weaponType": "스태프, 활",
+      "speed": 3,
+      "skill1Cost": 6,
+      "skill1Effect": "자신에게 데미지 1,  데미지 6"
+    },
+    {
+      "id": "S51",
+      "name": "공격의 연주",
+      "weaponType": "악기",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "다음에 나올 스킬 데미지 + 2"
+    },
+    {
+      "id": "S52",
+      "name": "희생의 등불",
+      "weaponType": "악기",
+      "speed": 3,
+      "skill1Cost": 0,
+      "skill1Effect": "아군 전체의 데미지1,  카드를 두장 드로우",
+      "skill2Cost": 1,
+      "skill2Effect": "(상처입은 노예 리베카 전용) 이 카드를 리베카에게 장착 - 사망할 시 아군 전체 2 회복"
+    },
+    {
+      "id": "S53",
+      "name": "바드의 분노",
+      "weaponType": "악기",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "리치 내 캐릭터에게 데미지 1,  그 후 다음의 버프 부여 [버프] 1턴 동안 데미지 +2"
+    },
+    {
+      "id": "S54",
+      "name": "처절한 함성",
+      "weaponType": "악기",
+      "speed": 4,
+      "skill1Cost": 2,
+      "skill1Effect": "아군 전체의 방어도 1증가"
+    },
+    {
+      "id": "S55",
+      "name": "핏빛 가시",
+      "weaponType": "한손검, 활",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "적군 3명 동시타격 가운데/사이드 -> 데미지2/데미지1"
+    },
+    {
+      "id": "S56",
+      "name": "지원의 노래",
+      "weaponType": "악기",
+      "speed": 4,
+      "skill1Cost": 3,
+      "skill1Effect": "이번 턴 스킬 코스트 -1"
+    },
+    {
+      "id": "S57",
+      "name": "갈망하는 피",
+      "weaponType": "책",
+      "speed": 1,
+      "skill1Cost": 0,
+      "skill1Effect": "턴 종료 시 덱에서 피카드 한장 덤핑"
+    },
+    {
+      "id": "S58",
+      "name": "피의 계약",
+      "weaponType": "책",
+      "speed": 2,
+      "skill1Cost": 3,
+      "skill1Effect": "엔드 페이즈에 이번 턴 아군이 받은 데미지의 절반으로 제일 가까운 적 캐릭터 공격"
+    },
+    {
+      "id": "S59",
+      "name": "핏빛 칼날",
+      "weaponType": "활, 한손검",
+      "speed": 5,
+      "skill1Cost": 2,
+      "skill1Effect": "데미지 2, 덱에서 피 카드 한 장 덤핑 (활 캐릭터가 사용시 데미지 +1, 리치 -1)"
+    },
+    {
+      "id": "S60",
+      "name": "광전사의 사기 충전",
+      "weaponType": "두손검",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "('광전사'만 사용 가능) 자신에게 데미지 4, 자신에게 다음의 버프 부여 [버프] 1턴 동안 스킬 데미지 + 5"
+    },
+    {
+      "id": "S61",
+      "name": "거대망치 후리기",
+      "weaponType": "두손검",
+      "speed": 2,
+      "skill1Cost": 4,
+      "skill1Effect": "(흥많은 드워프 전용) 데미지 5",
+      "skill2Cost": 4,
+      "skill2Effect": "2 데미지"
+    },
+    {
+      "id": "S62",
+      "name": "광전사의 던지기",
+      "weaponType": "두손검",
+      "speed": 3,
+      "skill1Cost": 4,
+      "skill1Effect": "('광전사'만 사용 가능) 자신이 장비중인 장비를 원하는 만큼 트래시에 넣고, 그 수 만큼 리치 내 모든 캐릭터들에게 데미지"
+    },
+    {
+      "id": "S63",
+      "name": "너 한 대, 나 두 대",
+      "weaponType": "두손검",
+      "speed": 2,
+      "skill1Cost": 4,
+      "skill1Effect": "이번 턴에 받은 데미지 + 2를 리치 내 가까운 적에게 준다."
+    },
+    {
+      "id": "S64",
+      "name": "오함마 타격",
+      "weaponType": "두손검",
+      "speed": 3,
+      "skill1Cost": 5,
+      "skill1Effect": "(노가다 10년 차 아저씨 전용) 관통 데미지 5",
+      "skill2Cost": 5,
+      "skill2Effect": "관통 2 데미지"
+    },
+    {
+      "id": "S65",
+      "name": "광전사의 메테오",
+      "weaponType": "두손검",
+      "speed": 1,
+      "skill1Cost": 7,
+      "skill1Effect": "('광전사'만 사용 가능) 리치 내 모든 캐릭터에게 데미지 5"
+    },
+    {
+      "id": "S66",
+      "name": "마지막 희망",
+      "weaponType": "책",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "리치내 아군 1명 HP 회복 3"
+    },
+    {
+      "id": "S67",
+      "name": "친절한 가이드",
+      "weaponType": "책",
+      "speed": 5,
+      "skill1Cost": 5,
+      "skill1Effect": "데미지 2,  덱에서 장비 카드 1장을 패로 추가"
+    },
+    {
+      "id": "S68",
+      "name": "코스트 제거",
+      "weaponType": "책",
+      "speed": 4,
+      "skill1Cost": 5,
+      "skill1Effect": "상대 코스트 3 소비시킨다"
+    },
+    {
+      "id": "S69",
+      "name": "연격",
+      "weaponType": "한손 검",
+      "speed": 3,
+      "skill1Cost": 1,
+      "skill1Effect": "데미지 1,  덱에서 '연격'을 가져온다."
+    },
+    {
+      "id": "S70",
+      "name": "순간의 일격",
+      "weaponType": "한손 검",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 2"
+    },
+    {
+      "id": "S71",
+      "name": "겁쟁이의 일격",
+      "weaponType": "한손 검",
+      "speed": 2,
+      "skill1Cost": 4,
+      "skill1Effect": "이번 턴에 받은 데미지를 리치 내 적 1명에게 똑같이 적용"
+    },
+    {
+      "id": "S72",
+      "name": "검사의 일격",
+      "weaponType": "한손 검",
+      "speed": 2,
+      "skill1Cost": 6,
+      "skill1Effect": "관통 데미지 2"
+    },
+    {
+      "id": "S73",
+      "name": "신속한 도약",
+      "weaponType": "한손검, 두손검",
+      "speed": 5,
+      "skill1Cost": 5,
+      "skill1Effect": "데미지 2,  엑셀로 사용 시 데미지 + 3"
+    },
+    {
+      "id": "S74",
+      "name": "고독한 결의",
+      "weaponType": "한손검",
+      "speed": 4,
+      "skill1Cost": 1,
+      "skill1Effect": "데미지 1,  HP 회복 1"
+    },
+    {
+      "id": "S75",
+      "name": "반란의 시작",
+      "weaponType": "한손검, 두손검",
+      "speed": 3,
+      "skill1Cost": 1,
+      "skill1Effect": "데미지 1,  2회 발동"
+    },
+    {
+      "id": "S76",
+      "name": "어수선한 전투",
+      "weaponType": "한손검, 두손검",
+      "speed": 3,
+      "skill1Cost": 2,
+      "skill1Effect": "데미지 1,  3회 발동"
+    },
+    {
+      "id": "S77",
+      "name": "피의 손길",
+      "weaponType": "한손검",
+      "speed": 4,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 2, 방어도 2 획득"
+    },
+    {
+      "id": "S78",
+      "name": "피의 마도서",
+      "weaponType": "책",
+      "speed": 1,
+      "skill1Cost": 4,
+      "skill1Effect": "트레쉬 존에 있는 피 카드당 아군 Hp 1회복  (최대 7)"
+    },
+    {
+      "id": "S79",
+      "name": "피의 계약",
+      "weaponType": "책",
+      "speed": 3,
+      "skill1Cost": -1,
+      "skill1Effect": "소모한 코스트 당 아군 HP회복"
+    },
+    {
+      "id": "S80",
+      "name": "핏빛 탄환",
+      "weaponType": "활",
+      "speed": 4,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 2, 트레쉬 존에 있는 피카드 장 당 데미지 +1 (최대 5)"
+    },
+    {
+      "id": "S81",
+      "name": "피의 축복",
+      "weaponType": "활, 한손검",
+      "speed": 3,
+      "skill1Cost": 3,
+      "skill1Effect": "데미지 2, Hp 2 회복 (Hp가 최대일 경우 방어도로 전환)"
+    },
+    {
+      "id": "S82",
+      "name": "피의 활시위",
+      "weaponType": "활",
+      "speed": 4,
+      "skill1Cost": 4,
+      "skill1Effect": "데미지 3, 이번턴 보유 코스트 2당 데미지 +1"
+    },
+    {
+      "id": "S83",
+      "name": "피의 참격",
+      "weaponType": "한손검",
+      "speed": 5,
+      "skill1Cost": 6,
+      "skill1Effect": "데미지 6"
+    },
+    {
+      "id": "S84",
+      "name": "마지막 저항",
+      "weaponType": "악기",
+      "speed": 5,
+      "skill1Cost": 0,
+      "skill1Effect": "[아군 전체 HP - 3] HP가 3 이하인 노예 및 추격자 데미지 +2",
+      "skill2Cost": 2,
+      "skill2Effect": "[HP -1] 카드를 두장 드로우"
+    }
+  ]
+}

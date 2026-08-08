@@ -1,0 +1,295 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CrossAccel.Core;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    public class CharacterEffectContext
+    {
+        public GameManager Game;
+        public CharacterUnit Self;
+        public PlayerState Owner;
+        public PlayerState Opponent;
+    }
+
+    /// <summary>
+    /// 데미지 계산 시점에 조건부 보너스를 묻는 컨텍스트 (C05, C15, C30 등)
+    /// </summary>
+    public class DamageModContext
+    {
+        public GameManager Game;
+        public CharacterUnit Attacker;
+        public CharacterUnit Target;
+        public PlayerState Owner;
+        public int SkillCost;
+    }
+
+    /// <summary>
+    /// 캐릭터 고유 효과: (캐릭터ID, 타이밍) → 핸들러.
+    /// 스타터 덱 캐릭터 20종 구현 완료.
+    /// 발동 여부(선택 효과)는 GameManager.EffectActivationPolicy로 위임 — 기본은 "지불 가능하면 발동".
+    /// </summary>
+    public static class CharacterEffectSystem
+    {
+        static readonly Dictionary<(string id, EffectTiming t), Action<CharacterEffectContext>> _triggers = new();
+        static readonly Dictionary<string, Func<DamageModContext, int>> _damageMods = new();
+
+        public static void RegisterTrigger(string charId, EffectTiming timing, Action<CharacterEffectContext> h) =>
+            _triggers[(charId, timing)] = h;
+
+        public static void RegisterDamageMod(string charId, Func<DamageModContext, int> f) =>
+            _damageMods[charId] = f;
+
+        /// <summary>특정 타이밍에 양쪽 파티의 해당 효과를 발동</summary>
+        public static void FireTiming(GameManager game, EffectTiming timing)
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                foreach (var unit in game.Players[p].Party.Where(u => u.IsAlive).ToList())
+                {
+                    if (_triggers.TryGetValue((unit.Data.id, timing), out var h))
+                    {
+                        h(new CharacterEffectContext
+                        {
+                            Game = game, Self = unit,
+                            Owner = game.Players[p], Opponent = game.Players[1 - p]
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>공격 시 조건부 데미지 보너스 합산</summary>
+        public static int GetDamageBonus(DamageModContext ctx)
+        {
+            return _damageMods.TryGetValue(ctx.Attacker.Data.id, out var f) ? f(ctx) : 0;
+        }
+
+        // =====================================================================
+        //  스타터 덱 캐릭터 20종
+        // =====================================================================
+
+        public static void RegisterAll()
+        {
+            // ---------------- Aggro 덱 ----------------
+
+            // C05 추적하는 사냥개 레나: 필드에 노예 종족 존재 시 데미지 +1
+            RegisterDamageMod("C05", ctx =>
+                ctx.Game.Players.Any(p => p.Party.Any(u => u.IsAlive && u.Data.race == "노예")) ? 1 : 0);
+
+            // C07 자유로운 모험가: [코스트 1] 이번 턴 카드 1장을 엑셀로 사용 가능
+            RegisterTrigger("C07", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Game.ShouldActivate(ctx.Self) && ctx.Owner.PayCost(1))
+                {
+                    ctx.Self.AccelTokens++;
+                    Debug.Log($"[C07] {ctx.Self.Data.name} — 엑셀 획득");
+                }
+            });
+
+            // C14 도망치는 검 카르멘: 레디 전 [HP-2] 턴 1회, 엑셀 + 다음 스킬 데미지 +1
+            RegisterTrigger("C14", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Self.EffectUsedThisTurn || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Self.PayHp(2))
+                {
+                    ctx.Self.EffectUsedThisTurn = true;
+                    ctx.Self.AccelTokens++;
+                    ctx.Game.NextSkillDamageBonus[ctx.Owner.PlayerId] += 1;
+                    Debug.Log($"[C14] 카르멘 — HP 2 지불, 엑셀 + 다음 스킬 +1");
+                }
+            });
+
+            // C15 추적하는 검 가르샤: 한 턴에 두 번 이상 공격 시 추가 데미지 +1
+            RegisterDamageMod("C15", ctx => ctx.Attacker.AttacksThisTurn >= 1 ? 1 : 0);
+
+            // C22 물리 치료사 셀리아: [HP-1] 필드 내 악기 캐릭터 1명당 데미지 +1
+            //  → 공격 시점에 자동 지불로 구현 (선택 효과 가정)
+            RegisterDamageMod("C22", ctx =>
+            {
+                int instruments = ctx.Game.Players.Sum(p =>
+                    p.Party.Count(u => u.IsAlive && u.Data.weaponType == "악기"));
+                if (instruments == 0 || !ctx.Game.ShouldActivate(ctx.Attacker)) return 0;
+                return ctx.Attacker.PayHp(1) ? instruments : 0;
+            });
+
+            // C30 해방을 꿈꾸는 노예 타이론: HP 3 이하의 적 공격 시 데미지 +2
+            RegisterDamageMod("C30", ctx =>
+                ctx.Target != null && ctx.Target.CurrentHp <= 3 ? 2 : 0);
+
+            // C31 강철의 분노 바르도: [HP-2] 턴 1회, 다음 스킬 데미지 +2
+            RegisterTrigger("C31", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Self.EffectUsedThisTurn || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Self.PayHp(2))
+                {
+                    ctx.Self.EffectUsedThisTurn = true;
+                    ctx.Game.NextSkillDamageBonus[ctx.Owner.PlayerId] += 2;
+                    Debug.Log($"[C31] 바르도 — HP 2 지불, 다음 스킬 +2");
+                }
+            });
+
+            // C39 추격하는 무희 라파엘: 레디 전 [HP-2] 카드 1장 드로우
+            RegisterTrigger("C39", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Game.ShouldActivate(ctx.Self) && ctx.Self.PayHp(2))
+                {
+                    ctx.Game.DrawToHand(ctx.Owner.PlayerId, 1);
+                    Debug.Log($"[C39] 라파엘 — HP 2 지불, 1장 드로우");
+                }
+            });
+
+            // C41 상처입은 노예 리베카: 레디 전 [HP-2] 리치 내 모든 아군 스킬 데미지 +1
+            //  ※ "리치 내 모든 캐릭터"의 아군/적군 범위 불명 — 아군으로 가정
+            RegisterTrigger("C41", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (!ctx.Game.ShouldActivate(ctx.Self) || !ctx.Self.PayHp(2)) return;
+                foreach (var ally in ctx.Owner.Party.Where(u => u.IsAlive))
+                    ally.TurnDamageBonus += 1;
+                Debug.Log($"[C41] 리베카 — HP 2 지불, 아군 전체 데미지 +1");
+            });
+
+            // C42 음악가 아즐: 레디 전 [2 코스트] 카드 1장 드로우
+            RegisterTrigger("C42", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Game.ShouldActivate(ctx.Self) && ctx.Owner.PayCost(2))
+                {
+                    ctx.Game.DrawToHand(ctx.Owner.PlayerId, 1);
+                    Debug.Log($"[C42] 아즐 — 2 코스트, 1장 드로우");
+                }
+            });
+
+            // ---------------- MidRange_Blood 덱 ----------------
+
+            // C02 피의 화살 레인: 배틀 개시 시 [Cost 3] 트래쉬 피 카드당 데미지 +1 (최대 5)
+            //  ※ "배틀페이즈 개시" = 액션 페이즈 시작으로 해석. 지속 기간 불명 — 이번 턴으로 가정
+            RegisterTrigger("C02", EffectTiming.OnBattleStart, ctx =>
+            {
+                int blood = EffectSystem.CountBloodCards(ctx.Owner);
+                if (blood == 0 || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Owner.PayCost(3))
+                {
+                    ctx.Self.TurnDamageBonus += Mathf.Min(5, blood);
+                    Debug.Log($"[C02] 레인 — 피 카드 {blood}장, 데미지 +{Mathf.Min(5, blood)}");
+                }
+            });
+
+            // C03 피의 후예 루트: 아군 스킬의 대상이 되었을 때 스킬 코스트당 데미지 +1 (최대 3)
+            RegisterTrigger("C03", EffectTiming.OnAllyTargeted, ctx => { /* 트리거는 EffectSystem에서 코스트와 함께 호출 */ });
+            OnAllyTargetedWithCost["C03"] = (unit, cost) =>
+            {
+                unit.TurnDamageBonus += Mathf.Min(3, cost);
+                Debug.Log($"[C03] 루트 — 아군 스킬 대상, 데미지 +{Mathf.Min(3, cost)}");
+            };
+
+            // C04 궁사 아마리요: 레디 페이즈 시 [3 코스트] 엑셀 획득
+            RegisterTrigger("C04", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (ctx.Game.ShouldActivate(ctx.Self) && ctx.Owner.PayCost(3))
+                {
+                    ctx.Self.AccelTokens++;
+                    Debug.Log($"[C04] 아마리요 — 엑셀 획득");
+                }
+            });
+
+            // C12 피의 검 아르케아: 턴 종료 시 [Cost 3] 트래쉬 피 카드당 데미지 1 (최대 5)
+            //  ※ 대상 불명 — 리치 내 가장 가까운 적에게 직접 데미지로 해석
+            RegisterTrigger("C12", EffectTiming.OnTurnEnd, ctx =>
+            {
+                int blood = EffectSystem.CountBloodCards(ctx.Owner);
+                if (blood == 0 || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                var target = ctx.Opponent.Party.FirstOrDefault(u => u.IsAlive && ctx.Self.CanReach(u.Position));
+                if (target != null && ctx.Owner.PayCost(3))
+                {
+                    int dmg = Mathf.Min(5, blood);
+                    target.TakeDamage(dmg);
+                    Debug.Log($"[C12] 아르케아 — 턴 종료, {target.Data.name}에게 {dmg} 데미지");
+                }
+            });
+
+            // C16 주정뱅이 회복술사: 액션 전 — HP 1 소모, 아군 HP 2 회복 (최저 HP 아군 대상)
+            RegisterTrigger("C16", EffectTiming.BeforeActionPhase, ctx =>
+            {
+                var wounded = ctx.Owner.Party
+                    .Where(u => u.IsAlive && u.CurrentHp < u.Data.maxHp && u != ctx.Self)
+                    .OrderBy(u => u.CurrentHp).FirstOrDefault();
+                if (wounded == null || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Self.PayHp(1))
+                {
+                    wounded.Heal(2);
+                    Debug.Log($"[C16] 회복술사 — {wounded.Data.name} HP 2 회복");
+                }
+            });
+
+            // C19 핏빛 날개 레비아: 아군 스킬 발동 전 [Cost 2] 아군 데미지 +2
+            //  ※ 발동 횟수 제한 불명 — 턴 1회로 가정
+            RegisterTrigger("C19", EffectTiming.BeforeActionPhase, ctx =>
+            {
+                if (ctx.Self.EffectUsedThisTurn || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Owner.PayCost(2))
+                {
+                    ctx.Self.EffectUsedThisTurn = true;
+                    ctx.Game.NextSkillDamageBonus[ctx.Owner.PlayerId] += 2;
+                    Debug.Log($"[C19] 레비아 — 다음 아군 스킬 +2");
+                }
+            });
+
+            // C21 광신도: [HP-?] 소모한 HP만큼 코스트 획득 (HP 1 미만 불가)
+            //  ※ 임시 코스트로 구현 (지속 기간 가정). AI: HP 절반 이상 남을 만큼만 변환
+            RegisterTrigger("C21", EffectTiming.BeforeReadyPhase, ctx =>
+            {
+                if (!ctx.Game.ShouldActivate(ctx.Self)) return;
+                int convert = Mathf.Min(2, ctx.Self.CurrentHp - ctx.Self.Data.maxHp / 2);
+                if (convert <= 0) return;
+                if (ctx.Self.PayHp(convert))
+                {
+                    ctx.Owner.TempCost += convert;
+                    Debug.Log($"[C21] 광신도 — HP {convert} → 코스트 {convert}");
+                }
+            });
+
+            // C24 피로 물든 파수꾼 레안: 활 스킬 사용 가능, 활 스킬 사용 시 리치 +1
+            RegisterTrigger("C24", EffectTiming.OnBattleStart, ctx =>
+            {
+                if (!ctx.Self.ExtraWeapons.Contains("활"))
+                {
+                    ctx.Self.ExtraWeapons.Add("활");
+                    Debug.Log($"[C24] 레안 — 활 스킬 사용 가능");
+                }
+            });
+            // 활 스킬 사용 시 리치 +1 은 EffectSystem.DealDamage에서 처리 (BowReachBonus)
+
+            // C25 피의 사신 실비아: 배틀 개시 시 리치 -1, 데미지 +2 (영구)
+            RegisterTrigger("C25", EffectTiming.OnBattleStart, ctx =>
+            {
+                if (!ctx.Self.OneTimeFlags.Add("C25")) return; // 1회만 적용
+                ctx.Self.ReachModifier -= 1;
+                ctx.Self.PermanentDamageBonus += 2;
+                Debug.Log($"[C25] 실비아 — 리치 -1, 데미지 +2");
+            });
+
+            // C29 핏빛 그림자 리퍼: 배틀 개시 시 [Cost 3] 트래쉬 피 카드 4장 이상이면 데미지 +3
+            RegisterTrigger("C29", EffectTiming.OnBattleStart, ctx =>
+            {
+                if (EffectSystem.CountBloodCards(ctx.Owner) < 4 || !ctx.Game.ShouldActivate(ctx.Self)) return;
+                if (ctx.Owner.PayCost(3))
+                {
+                    ctx.Self.TurnDamageBonus += 3;
+                    Debug.Log($"[C29] 리퍼 — 피 카드 4장+, 데미지 +3");
+                }
+            });
+        }
+
+        /// <summary>아군 스킬 대상이 되었을 때 (스킬 코스트 전달) — C03용</summary>
+        public static readonly Dictionary<string, Action<CharacterUnit, int>> OnAllyTargetedWithCost = new();
+
+        public static void FireAllyTargeted(CharacterUnit target, int skillCost)
+        {
+            if (OnAllyTargetedWithCost.TryGetValue(target.Data.id, out var h))
+                h(target, skillCost);
+        }
+    }
+}

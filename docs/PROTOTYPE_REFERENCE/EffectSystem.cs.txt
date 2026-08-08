@@ -1,0 +1,273 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>
+    /// 효과 실행 컨텍스트 — 핸들러가 게임 상태에 접근하는 통로.
+    /// </summary>
+    public class EffectContext
+    {
+        public GameManager Game;
+        public PlayerState Owner;
+        public PlayerState Opponent;
+        public CharacterUnit User;          // 스킬 사용 캐릭터 (캐릭터 효과면 자기 자신)
+        public CharacterUnit Target;        // 지정 대상 (없으면 null)
+        public string CardId;               // 발동 중인 카드 ID
+        public bool IsAccel;                // 엑셀로 사용 중인가
+        public int DamageBonus;             // 버프로 누적된 추가 데미지
+        public bool Pierce;                 // 관통 부여 여부
+    }
+
+    /// <summary>
+    /// 카드 효과는 자연어 텍스트라 파싱하지 않고, 카드 ID → C# 핸들러로 직접 매핑한다.
+    /// 84종 스킬을 한 번에 구현하지 말고, 스타터 덱 2개에 쓰이는 카드부터 우선 구현.
+    /// 미구현 카드는 로그만 남기고 진행되므로 점진적 개발 가능.
+    /// </summary>
+    public static class EffectSystem
+    {
+        static readonly Dictionary<string, Action<EffectContext>> _handlers = new();
+
+        public static void Register(string cardId, Action<EffectContext> handler) =>
+            _handlers[cardId] = handler;
+
+        public static bool Execute(EffectContext ctx)
+        {
+            if (_handlers.TryGetValue(ctx.CardId, out var handler))
+            {
+                handler(ctx);
+                return true;
+            }
+            Debug.LogWarning($"[EffectSystem] 미구현 효과: {ctx.CardId} — 스킵");
+            return false;
+        }
+
+        /// <summary>스타터 덱 우선 구현 예시. 게임 시작 시 한 번 호출.</summary>
+        public static void RegisterAll()
+        {
+            // ===== 공용 스킬 =====
+
+            // S07 공격: 데미지 2
+            Register("S07", ctx => DealDamage(ctx, 2));
+
+            // S06 회복: HP 1 회복
+            Register("S06", ctx => ctx.User.Heal(1));
+
+            // S08 시원한 맥주: HP 2 회복
+            Register("S08", ctx => ctx.User.Heal(2));
+
+            // S10 의자 던지기: 데미지 2
+            Register("S10", ctx => DealDamage(ctx, 2));
+
+            // S14 방어: 방어도 3
+            Register("S14", ctx => ctx.User.AddArmor(3));
+
+            // S25 신념의 일격 (두손검): 데미지 2
+            Register("S25", ctx => DealDamage(ctx, 2));
+
+            // S26 해방의 분노 (두손검): 데미지 3
+            Register("S26", ctx => DealDamage(ctx, 3));
+
+            // S74 고독한 결의 (한손검): 데미지 1, HP 회복 1
+            Register("S74", ctx => { DealDamage(ctx, 1); ctx.User.Heal(1); });
+
+            // S75 반란의 시작 (한손검/두손검): 데미지 1, 2회 발동
+            Register("S75", ctx => { DealDamage(ctx, 1); DealDamage(ctx, 1); });
+
+            // S76 어수선한 전투 (한손검/두손검): 데미지 1, 3회 발동
+            Register("S76", ctx => { for (int i = 0; i < 3; i++) DealDamage(ctx, 1); });
+
+            // S70 순간의 일격 (한손검): 데미지 2
+            Register("S70", ctx => DealDamage(ctx, 2));
+
+            // S72 검사의 일격 (한손검): 관통 데미지 2
+            Register("S72", ctx => { ctx.Pierce = true; DealDamage(ctx, 2); });
+
+            // S83 피의 참격 (한손검): 데미지 6
+            Register("S83", ctx => DealDamage(ctx, 6));
+
+            // ===== Aggro 덱 =====
+
+            // S01 치고 빠지기: 데미지 2, 이번 턴 이전에 발동된 스킬이 있으면 실패
+            Register("S01", ctx =>
+            {
+                if (ctx.Game.SkillsResolvedThisTurn[ctx.Owner.PlayerId] > 0)
+                { Debug.Log("[S01] 이전 스킬 존재 — 실패"); return; }
+                DealDamage(ctx, 2);
+            });
+
+            // S20 잔혹한 운명: (노예 전용) 데미지 8, 자신 사망
+            Register("S20", ctx =>
+            {
+                if (ctx.User.Data.race != "노예" && ctx.User.Data.race != "추격자")
+                { Debug.Log("[S20] 종족 조건 불충족"); return; }
+                DealDamage(ctx, 8);
+                if (ctx.User.Data.race == "노예")
+                    ctx.User.TakeDamage(999, pierce: true);          // skill1: 자신 사망
+                else
+                    foreach (var ally in ctx.Owner.Party)             // skill2: 아군 전체 2 데미지
+                        if (ally.IsAlive) ally.TakeDamage(2, pierce: true);
+            });
+
+            // S84 마지막 저항 (악기): [아군 전체 HP -3] HP 3 이하 노예/추격자 데미지 +2 → 단순화: 버프로
+            Register("S84", ctx =>
+            {
+                foreach (var ally in ctx.Owner.Party)
+                    if (ally.IsAlive) ally.TakeDamage(3, pierce: true);
+                ctx.Game.NextSkillDamageBonus[ctx.Owner.PlayerId] += 2;
+            });
+
+            // S52 희생의 등불 (악기): 아군 전체 데미지 1, 카드 2장 드로우 — ※ 스타터덱 표기는 S53 (ID 불일치, 양쪽 등록)
+            System.Action<EffectContext> lantern = ctx =>
+            {
+                foreach (var ally in ctx.Owner.Party)
+                    if (ally.IsAlive) ally.TakeDamage(1, pierce: true);
+                ctx.Game.DrawToHand(ctx.Owner.PlayerId, 2);
+            };
+            Register("S52", lantern);
+            Register("S53", lantern); // ※ 데이터 정리 후 S53은 바드의 분노로 교체할 것
+
+            // S13 카운터: 이번 턴 받은 데미지를 리치 내 적 1명에게
+            Register("S13", ctx =>
+            {
+                int dmg = ctx.Owner.DamageTakenThisTurn;
+                if (dmg <= 0) { Debug.Log("[S13] 받은 데미지 없음"); return; }
+                DealDamage(ctx, dmg);
+            });
+
+            // S57 갈망하는 피 (책): 턴 종료 시 덱에서 피 카드 1장 덤핑 — 즉시 덤핑으로 단순화 (※ 타이밍 가정)
+            Register("S57", ctx =>
+            {
+                int idx = ctx.Owner.MainDeck.FindIndex(id =>
+                {
+                    var sk = Data.CardDatabase.GetSkill(id);
+                    return sk != null && (sk.name.Contains("피") || sk.name.Contains("핏빛"));
+                });
+                if (idx >= 0)
+                {
+                    string card = ctx.Owner.MainDeck[idx];
+                    ctx.Owner.MainDeck.RemoveAt(idx);
+                    ctx.Owner.Trash.Add(card);
+                    Debug.Log($"[S57] 피 카드 덤핑: {Data.CardDatabase.GetSkill(card).name}");
+                }
+            });
+
+            // S79 피의 계약 (책): 소모한 코스트당 아군 HP 회복 — X 코스트로 해석 (데이터에 코스트 미기재)
+            Register("S79", ctx =>
+            {
+                int x = Mathf.Min(3, ctx.Owner.AvailableCost); // AI: 최대 3까지 지불
+                if (x <= 0 || !ctx.Owner.PayCost(x)) return;
+                var wounded = ctx.Owner.Party.Where(u => u.IsAlive && u.CurrentHp < u.Data.maxHp)
+                                             .OrderBy(u => u.CurrentHp).FirstOrDefault();
+                if (wounded != null)
+                {
+                    wounded.Heal(x);
+                    CharacterEffectSystem.FireAllyTargeted(wounded, x); // C03 루트 트리거
+                    Debug.Log($"[S79] {wounded.Data.name} HP {x} 회복");
+                }
+            });
+
+            // ===== MidRange_Blood 덱 =====
+
+            // S55 핏빛 가시: 적 3명 동시타격 (가운데 2 / 양옆 1)
+            Register("S55", ctx =>
+            {
+                if (ctx.Target == null) return;
+                int center = ctx.Target.Position;
+                foreach (var enemy in ctx.Opponent.Party)
+                {
+                    if (!enemy.IsAlive) continue;
+                    int dist = Mathf.Abs(enemy.Position - center);
+                    if (dist == 0) enemy.TakeDamage(2 + ctx.DamageBonus);
+                    else if (dist == 1) enemy.TakeDamage(1);
+                }
+            });
+
+            // S77 피의 손길: 데미지 2, 방어도 2 획득
+            Register("S77", ctx => { DealDamage(ctx, 2); ctx.User.AddArmor(2); });
+
+            // S80 핏빛 탄환: 데미지 2 + 트래쉬 피 카드당 +1 (최대 5)
+            Register("S80", ctx => DealDamage(ctx, 2 + Mathf.Min(5, CountBloodCards(ctx.Owner))));
+
+            // S81 피의 축복: 데미지 2, HP 2 회복 (최대면 방어도로)
+            Register("S81", ctx =>
+            {
+                DealDamage(ctx, 2);
+                if (ctx.User.CurrentHp >= ctx.User.Data.maxHp) ctx.User.AddArmor(2);
+                else ctx.User.Heal(2);
+            });
+
+            // S82 피의 활시위: 데미지 3 + 보유 코스트 2당 +1
+            Register("S82", ctx => DealDamage(ctx, 3 + ctx.Owner.AvailableCost / 2));
+
+            // S78 피의 마도서: 트래쉬 피 카드당 아군 HP 1 회복 (최대 7)
+            Register("S78", ctx =>
+            {
+                int n = Mathf.Min(7, CountBloodCards(ctx.Owner));
+                foreach (var ally in ctx.Owner.Party) if (ally.IsAlive) ally.Heal(1 * n > 0 ? 1 : 0);
+                // ※ "아군 HP 1회복 ×n"의 분배 방식 불명 — 전체 1회복으로 단순화, 규칙 확인 필요
+            });
+
+            // S59 핏빛 칼날: 데미지 2 (활 캐릭터 사용 시 +1)
+            Register("S59", ctx =>
+            {
+                int dmg = ctx.User.Data.weaponType == "활" ? 3 : 2;
+                DealDamage(ctx, dmg);
+            });
+        }
+
+        /// <summary>트래쉬의 '피 카드' 수. ※ 피 카드의 정의가 데이터에 없어 이름에 '피'/'핏빛' 포함으로 가정 — 확인 필요</summary>
+        public static int CountBloodCards(PlayerState p)
+        {
+            int n = 0;
+            foreach (var id in p.Trash)
+            {
+                var s = Data.CardDatabase.GetSkill(id);
+                if (s != null && (s.name.Contains("피") || s.name.Contains("핏빛"))) n++;
+            }
+            return n;
+        }
+
+        /// <summary>공통 데미지 처리 — 리치 검사, 버프 합산, 관통 적용을 한곳에서.</summary>
+        public static void DealDamage(EffectContext ctx, int baseAmount)
+        {
+            var target = ctx.Target;
+            if (target == null || !target.IsAlive)
+            {
+                Debug.LogWarning($"[{ctx.CardId}] 유효한 대상 없음");
+                return;
+            }
+
+            var skill = Data.CardDatabase.GetSkill(ctx.CardId);
+
+            // C24 레안: 활 스킬 사용 시 리치 +1
+            int reachBonus = 0;
+            if (ctx.User.Data.id == "C24" && skill != null && skill.GetWeaponTypes().Contains("활"))
+                reachBonus = 1;
+
+            int distance = ctx.User.Position + target.Position + 1; // ✅ 확정: 내위치+상대위치+1
+            if (ctx.User.EffectiveReach + reachBonus < distance)
+            {
+                Debug.Log($"[{ctx.CardId}] 리치 부족 — 공격 실패");
+                return;
+            }
+
+            // 캐릭터 조건부 보정 (C05, C15, C30 등)
+            int charMod = CharacterEffectSystem.GetDamageBonus(new DamageModContext
+            {
+                Game = ctx.Game, Attacker = ctx.User, Target = target,
+                Owner = ctx.Owner, SkillCost = skill?.skill1Cost ?? 0
+            });
+
+            int total = baseAmount + ctx.DamageBonus
+                      + ctx.User.TurnDamageBonus + ctx.User.PermanentDamageBonus + charMod;
+            int dealt = target.TakeDamage(total, ctx.Pierce);
+
+            ctx.User.AttacksThisTurn++;
+            if (ctx.Game != null)
+                ctx.Game.Players[target.OwnerId].DamageTakenThisTurn += dealt; // S13 카운터용
+            Debug.Log($"[{ctx.CardId}] {ctx.User.Data.name} → {target.Data.name}: {dealt} 데미지 (HP {target.CurrentHp})");
+        }
+    }
+}

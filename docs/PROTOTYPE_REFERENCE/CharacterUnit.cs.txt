@@ -1,0 +1,89 @@
+using System.Collections.Generic;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>
+    /// 필드에 배치된 캐릭터의 런타임 상태.
+    /// 원본 CharacterData는 불변으로 두고, 변하는 값(HP, 방어도, 버프)은 여기서 관리.
+    /// </summary>
+    public class CharacterUnit
+    {
+        public readonly CharacterData Data;
+        public readonly int OwnerId;         // 0 or 1
+        public int Position;                 // 0(1선) ~ 3(4선) — 리치 계산 기준
+
+        public int CurrentHp { get; private set; }
+        public int Armor { get; private set; }          // 방어도 — 턴 단위 리셋 정책은 미확정(설명서에 명시 없음)
+        public int AccelTokens;                          // 보유 '엑셀' 수 (레디 페이즈에 소모)
+        public int SwiftTokens;                          // 보유 '신속' 수
+        public bool IsAlive => CurrentHp > 0;
+        public bool UsedLethalSave;                      // "게임 중 한 번 HP 1로 유지" 계열 효과 사용 여부
+
+        // ===== 캐릭터 효과용 상태 =====
+        public int TurnDamageBonus;                      // 이번 턴 스킬 데미지 보너스 (매 턴 리셋)
+        public int PermanentDamageBonus;                 // 영구 데미지 보너스 (C25 실비아 등)
+        public int ReachModifier;                        // 리치 증감 (C25, C27 등)
+        public List<string> ExtraWeapons = new();        // 추가 사용 가능 무기 (C24 레안: 활)
+        public int AttacksThisTurn;                      // 이번 턴 공격 횟수 (C15 가르샤 조건)
+        public bool EffectUsedThisTurn;                  // "턴에 한 번" 효과 사용 여부
+        public HashSet<string> OneTimeFlags = new();     // "게임 중 한 번 / 영구 적용 1회" 효과 기록
+
+        /// <summary>매 턴 시작 시 리셋</summary>
+        public void ResetTurnState()
+        {
+            TurnDamageBonus = 0;
+            AttacksThisTurn = 0;
+            EffectUsedThisTurn = false;
+        }
+
+        public int EffectiveReach => Mathf.Max(1, Data.reach + ReachModifier);
+
+        public CharacterUnit(CharacterData data, int ownerId, int position)
+        {
+            Data = data;
+            OwnerId = ownerId;
+            Position = position;
+            CurrentHp = data.maxHp;
+        }
+
+        /// <summary>관통이면 방어도 무시. 실제 잃은 HP를 반환.</summary>
+        public int TakeDamage(int amount, bool pierce = false)
+        {
+            int remaining = amount;
+            if (!pierce && Armor > 0)
+            {
+                int absorbed = Mathf.Min(Armor, remaining);
+                Armor -= absorbed;
+                remaining -= absorbed;
+            }
+            int before = CurrentHp;
+            CurrentHp = Mathf.Max(0, CurrentHp - remaining);
+            return before - CurrentHp;
+        }
+
+        public void Heal(int amount) =>
+            CurrentHp = Mathf.Min(Data.maxHp, CurrentHp + amount);
+
+        public void AddArmor(int amount) => Armor += amount;
+        public void ResetArmor() => Armor = 0;
+
+        /// <summary>자기 위치 + 리치로 공격 가능한 상대 위치인지.
+        /// ✅ 확정 규칙: 거리 = 내위치 + 상대위치 + 1 (맨끝↔맨끝 = 3+3+1 = 7)</summary>
+        public bool CanReach(int enemyPosition)
+        {
+            int distance = Position + enemyPosition + 1;
+            return EffectiveReach >= distance;
+        }
+
+        /// <summary>효과 비용으로 HP 지불. HP가 1 미만이 되면 지불 불가(false).
+        /// ※ "HP -2" 비용으로 자멸 가능한지 규칙 미확정 — 자멸 불가로 가정</summary>
+        public bool PayHp(int amount)
+        {
+            if (CurrentHp - amount < 1) return false;
+            CurrentHp -= amount;
+            return true;
+        }
+    }
+}

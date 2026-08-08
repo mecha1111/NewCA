@@ -1,0 +1,17 @@
+{
+  "name": "CrossAccel.Runtime",
+  "rootNamespace": "CrossAccel",
+  "references": [
+    "Unity.Nuget.Newtonsoft-Json",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

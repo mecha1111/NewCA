@@ -1,0 +1,330 @@
+using System.Collections.Generic;
+using System.Linq;
+using CrossAccel.Core;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>
+    /// 게임 흐름 상태머신.
+    /// 지금은 로컬 2인(핫시트/AI) 전제로 설계 — 온라인화 시 이 클래스가 서버 권한 로직이 된다.
+    /// UI는 이벤트를 구독해서 그리기만 할 것 (로직/뷰 분리).
+    /// </summary>
+    public class GameManager : MonoBehaviour
+    {
+        public GamePhase Phase { get; private set; } = GamePhase.None;
+        public int TurnNumber { get; private set; }
+        public PlayerState[] Players { get; private set; }
+
+        // UI 구독용 이벤트
+        public event System.Action<GamePhase> OnPhaseChanged;
+        public event System.Action<int> OnGameOver;  // 승자 PlayerId
+
+        /// <summary>타겟 선택 위임 — AI나 UI가 설정. null이면 최전선 자동 타겟.</summary>
+        public System.Func<CharacterUnit, PlayerState, string, CharacterUnit> TargetSelector;
+
+        /// <summary>선택 효과 발동 정책 — AI/UI가 설정. 기본: 항상 발동.</summary>
+        public System.Func<CharacterUnit, bool> EffectActivationPolicy;
+        public bool ShouldActivate(CharacterUnit unit) => EffectActivationPolicy?.Invoke(unit) ?? true;
+
+        /// <summary>효과에 의한 드로우 (트래쉬 재셔플 규칙 포함)</summary>
+        public void DrawToHand(int playerId, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var c = Players[playerId].Draw(_rng);
+                if (c != null) Players[playerId].Hand.Add(c);
+            }
+        }
+
+        // 턴 컨텍스트 (연계 효과용) — BeginTurn에서 리셋
+        public int[] SkillsResolvedThisTurn = new int[2];   // "이전에 사용된 스킬이 있으면" 판정용
+        public int[] NextSkillDamageBonus = new int[2];      // "다음 스킬 데미지 +N" 버프
+
+        System.Random _rng;
+
+        void Awake()
+        {
+            CardDatabase.Load();
+            EffectSystem.RegisterAll();
+            CharacterEffectSystem.RegisterAll();
+        }
+
+        // ===================== 게임 시작 =====================
+
+        public void StartGame(DeckSelection p0Deck, DeckSelection p1Deck, int? seed = null)
+        {
+            _rng = seed.HasValue ? new System.Random(seed.Value) : new System.Random();
+            Players = new[] { new PlayerState(0), new PlayerState(1) };
+            TurnNumber = 0;
+            SetPhase(GamePhase.BanPick);
+            // 밴픽은 UI 상호작용이 필요하므로 BanPickController가 진행 후
+            // FinishBanPick(...) 을 호출하는 구조.
+            _pendingDecks = new[] { p0Deck, p1Deck };
+        }
+
+        DeckSelection[] _pendingDecks;
+
+        /// <summary>밴픽 결과를 받아 세팅 단계 진행. picks = 각 플레이어의 최종 4장(순서 = 배치 순서).</summary>
+        public void FinishBanPick(List<string>[] picks, List<string>[] leftovers)
+        {
+            SetPhase(GamePhase.Setup);
+            for (int p = 0; p < 2; p++)
+            {
+                for (int i = 0; i < picks[p].Count; i++)
+                {
+                    var data = CardDatabase.GetCharacter(picks[p][i]);
+                    Players[p].Party.Add(new CharacterUnit(data, p, i));
+                }
+                Players[p].HpCounterCards.AddRange(leftovers[p]);
+                Players[p].BuildMainDeck(_pendingDecks[p].MainDeckEntries, _rng);
+            }
+            BeginMulligan();
+        }
+
+        void BeginMulligan()
+        {
+            SetPhase(GamePhase.Mulligan);
+            foreach (var p in Players)
+                for (int i = 0; i < GameRules.StartingHandSize; i++)
+                    p.Hand.Add(p.Draw(_rng));
+            // UI: 각 플레이어가 패에서 2장 골라 PlaceCost() 호출 → 완료되면 BeginTurn()
+        }
+
+        // ===================== 턴 진행 =====================
+
+        public void BeginTurn()
+        {
+            TurnNumber++;
+            SkillsResolvedThisTurn = new int[2];
+            NextSkillDamageBonus = new int[2];
+            foreach (var p in Players) p.ResetForNewTurn(); // ✅ 코스트 매 턴 언레스트 (확정)
+            SetPhase(GamePhase.Draw);
+            LastDrawn = new List<string>[] { new(), new() };
+            foreach (var p in Players)
+            {
+                for (int i = 0; i < GameRules.DrawPerTurn; i++)
+                {
+                    var c = p.Draw(_rng);
+                    if (c != null) LastDrawn[p.PlayerId].Add(c);
+                }
+                p.Hand.AddRange(LastDrawn[p.PlayerId]);
+                // 규칙: 이번에 드로우한 카드 중 최대 2장만 코스트존으로 보낼 수 있음
+            }
+        }
+
+        /// <summary>이번 턴 드로우한 카드 (코스트 배치 제한 검사용)</summary>
+        public List<string>[] LastDrawn { get; private set; }
+
+        /// <summary>드로우 페이즈의 코스트 배치가 끝나면 호출</summary>
+        public void BeginReadyPhase()
+        {
+            SetPhase(GamePhase.Ready);
+            foreach (var p in Players) p.ActiveZone.Clear();
+            CharacterEffectSystem.FireTiming(this, EffectTiming.BeforeReadyPhase); // C04, C07, C14, C21, C31, C39, C41, C42
+            // UI: 각자 사용할 카드를 ActiveSlot으로 등록 (SubmitActiveCard)
+        }
+
+        public void SubmitActiveCard(int playerId, string skillId, CharacterUnit user, bool asAccel, bool asSwift)
+        {
+            var p = Players[playerId];
+            if (!p.Hand.Remove(skillId)) return;
+            p.ActiveZone.Add(new ActiveSlot { SkillId = skillId, User = user, IsAccel = asAccel, IsSwift = asSwift });
+        }
+
+        /// <summary>양쪽 레디 완료 → 액션 페이즈 실행</summary>
+        public void RunActionPhase()
+        {
+            SetPhase(GamePhase.Action);
+            CharacterEffectSystem.FireTiming(this, EffectTiming.OnBattleStart);     // ※ "배틀 개시" = 매턴 액션 시작 가정 (C02, C29 / C24, C25는 1회 플래그)
+            CharacterEffectSystem.FireTiming(this, EffectTiming.BeforeActionPhase); // C16, C19
+
+            // 1) 엑셀 지정 카드 먼저, 속도순 발동
+            ResolveGroup(slot => slot.IsAccel);
+            // 2) 나머지 카드 속도순 발동
+            ResolveGroup(slot => !slot.IsAccel);
+
+            RunEndPhase();
+        }
+
+        void ResolveGroup(System.Func<ActiveSlot, bool> filter)
+        {
+            // 양 플레이어의 해당 그룹 카드를 모아 속도순 정렬
+            var queue = new List<(int owner, ActiveSlot slot, SkillData data)>();
+            for (int p = 0; p < 2; p++)
+                foreach (var slot in Players[p].ActiveZone.Where(s => !s.Revealed && filter(s)))
+                    queue.Add((p, slot, CardDatabase.GetSkill(slot.SkillId)));
+
+            // 확정 규칙: 속도가 높을수록 먼저 발동
+            queue = queue.OrderByDescending(q => q.data.speed).ToList();
+
+            int i = 0;
+            while (i < queue.Count)
+            {
+                var cur = queue[i];
+                // 속도 동률 + 서로 다른 플레이어 → 챌린지
+                if (i + 1 < queue.Count &&
+                    queue[i + 1].data.speed == cur.data.speed &&
+                    queue[i + 1].owner != cur.owner)
+                {
+                    var other = queue[i + 1];
+                    int winner = ResolveChallenge(cur.owner, other.owner, cur.slot, other.slot);
+                    cur.slot.Revealed = true;
+                    other.slot.Revealed = true;
+                    if (winner == cur.owner) ActivateSlot(cur.owner, cur.slot, cur.data);
+                    else if (winner == other.owner) ActivateSlot(other.owner, other.slot, other.data);
+                    else Debug.Log("[챌린지] 양측 무효 — 두 카드 모두 발동 안 됨");
+                    // ※ 무효 시 코스트 반환 없음 (설명서: 코스트 반환 없음)
+                    i += 2;
+                }
+                else
+                {
+                    ActivateSlot(cur.owner, cur.slot, cur.data);
+                    i++;
+                }
+            }
+        }
+
+        void ActivateSlot(int owner, ActiveSlot slot, SkillData data)
+        {
+            slot.Revealed = true;
+            var p = Players[owner];
+            var opp = Players[1 - owner];
+
+            int cost = data.skill1Cost < 0 ? 0 : data.skill1Cost;
+            if (!p.PayCost(cost))
+            {
+                Debug.Log($"[P{owner}] {data.name} — 코스트 부족, 불발");
+                p.Trash.Add(slot.SkillId);
+                return;
+            }
+
+            var target = TargetSelector != null
+                ? TargetSelector(slot.User, opp, slot.SkillId)
+                : opp.Party.FirstOrDefault(u => u.IsAlive);
+
+            var ctx = new EffectContext
+            {
+                Game = this, Owner = p, Opponent = opp,
+                User = slot.User,
+                Target = target,
+                CardId = slot.SkillId,
+                IsAccel = slot.IsAccel,
+                DamageBonus = NextSkillDamageBonus[owner]
+            };
+            NextSkillDamageBonus[owner] = 0; // 버프는 1회 소모
+            EffectSystem.Execute(ctx);
+            SkillsResolvedThisTurn[owner]++;
+            p.Trash.Add(slot.SkillId);
+        }
+
+        /// <summary>
+        /// 챌린지: 각자 덱 탑을 공개, 발동 캐릭터와 무기 타입이 같으면 성공.
+        /// ✅ 확정 규칙:
+        ///  - 공개 카드는 트래쉬로.
+        ///  - 둘 다 성공 → 반복. 둘 다 실패 → 양쪽 무효(-1).
+        ///  - 공용 카드는 무효(매칭 실패로 처리).
+        ///  - 챌린지 중 덱 0장 → 자동 패배(트래쉬 재순환 없음). 둘 다 0장 → 양쪽 무효.
+        /// 반환: 승자 playerId, -1 = 양측 무효.
+        /// </summary>
+        public int ResolveChallenge(int pA, int pB, ActiveSlot slotA, ActiveSlot slotB)
+        {
+            while (true)
+            {
+                string topA = Players[pA].RevealTopForChallenge();
+                string topB = Players[pB].RevealTopForChallenge();
+
+                bool aOut = topA == null;
+                bool bOut = topB == null;
+                if (aOut && bOut) { Debug.Log("[챌린지] 양측 덱 소진 → 무효"); return -1; }
+                if (aOut) { Debug.Log($"[챌린지] P{pA} 덱 소진 → P{pB} 자동 성공"); return pB; }
+                if (bOut) { Debug.Log($"[챌린지] P{pB} 덱 소진 → P{pA} 자동 성공"); return pA; }
+
+                bool aSuccess = MatchWeapon(slotA, topA);
+                bool bSuccess = MatchWeapon(slotB, topB);
+                Players[pA].Trash.Add(topA); // ✅ 공개 카드는 트래쉬로
+                Players[pB].Trash.Add(topB);
+
+                if (aSuccess && !bSuccess) return pA;
+                if (bSuccess && !aSuccess) return pB;
+                if (!aSuccess && !bSuccess) { Debug.Log("[챌린지] 양측 실패 → 무효"); return -1; } // ✅ 양측 실패 = 무효
+                // 둘 다 성공 → 반복
+                Debug.Log("[챌린지] 양측 성공 → 재공개");
+            }
+        }
+
+        bool MatchWeapon(ActiveSlot slot, string topCardId)
+        {
+            var skill = CardDatabase.GetSkill(topCardId);
+            if (skill == null || slot?.User == null) return false;
+            var types = skill.GetWeaponTypes();
+            if (types.Contains("공용")) return false; // ✅ 공용 카드는 무효
+            return types.Contains(slot.User.Data.weaponType.Replace(" ", ""));
+        }
+
+        // ===================== 엔드 페이즈 =====================
+
+        void RunEndPhase()
+        {
+            SetPhase(GamePhase.End);
+            CharacterEffectSystem.FireTiming(this, EffectTiming.OnTurnEnd); // C12
+            foreach (var p in Players)
+            {
+                // HP 0 캐릭터 → 코스트존 배치 (규칙)
+                var dead = p.Party.Where(u => !u.IsAlive).ToList();
+                foreach (var u in dead)
+                {
+                    p.Party.Remove(u);
+                    p.CostZone.Add(new CostCard { CardId = u.Data.id, IsRested = false });
+                    Debug.Log($"[P{p.PlayerId}] {u.Data.name} 사망 → 코스트존");
+                }
+                // 앞당김 (Position 재정렬)
+                for (int i = 0; i < p.Party.Count; i++) p.Party[i].Position = i;
+            }
+
+            for (int p = 0; p < 2; p++)
+            {
+                if (Players[p].HasLost)
+                {
+                    SetPhase(GamePhase.GameOver);
+                    OnGameOver?.Invoke(1 - p);
+                    return;
+                }
+            }
+
+            // ✅ 확정 규칙: 방어도는 턴이 끝나면 사라진다 (엔드 페이즈 효과 처리 후 클리어)
+            foreach (var pl in Players)
+                foreach (var u in pl.Party)
+                    u.ResetArmor();
+
+            // 다음 턴은 드라이버(플레이어 입력 or AI 루프)가 BeginTurn() 호출로 진행.
+        }
+
+        void SetPhase(GamePhase phase)
+        {
+            Phase = phase;
+            Debug.Log($"===== Phase: {phase} (Turn {TurnNumber}) =====");
+            OnPhaseChanged?.Invoke(phase);
+        }
+    }
+
+    /// <summary>플레이어가 게임에 들고 온 덱 (밴픽 전)</summary>
+    public class DeckSelection
+    {
+        public List<string> CharacterDeck = new();                       // 8장
+        public List<(string id, int count)> MainDeckEntries = new();     // 합계 24장
+
+        public static DeckSelection FromStarter(DeckData deck)
+        {
+            var sel = new DeckSelection();
+            foreach (var e in deck.cards)
+            {
+                if (e.cardType == "Character") sel.CharacterDeck.Add(e.cardId);
+                else if (e.cardType == "Skill") sel.MainDeckEntries.Add((e.cardId, e.count));
+                // Item은 데이터 미완 — 추후 지원
+            }
+            return sel;
+        }
+    }
+}

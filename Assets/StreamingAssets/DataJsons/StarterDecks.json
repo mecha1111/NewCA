@@ -1,0 +1,249 @@
+{
+  "decks": [
+    {
+      "deckName": "Aggro",
+      "cards": [
+        {
+          "cardId": "C05",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C07",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C14",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C15",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C22",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C30",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C31",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C39",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C41",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C42",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "S01",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S06",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S20",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S25",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S26",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S53",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S74",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S75",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S76",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S84",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "I13",
+          "cardType": "Item",
+          "count": 1
+        },
+        {
+          "cardId": "I14",
+          "cardType": "Item",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "deckName": "MidRange_Blood",
+      "cards": [
+        {
+          "cardId": "C02",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C03",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C04",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C12",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C16",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C19",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C21",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C24",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C25",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "C29",
+          "cardType": "Character",
+          "count": 1
+        },
+        {
+          "cardId": "S07",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S08",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S10",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S13",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S14",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S55",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S57",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S77",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S78",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S79",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S80",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S81",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S82",
+          "cardType": "Skill",
+          "count": 2
+        },
+        {
+          "cardId": "S83",
+          "cardType": "Skill",
+          "count": 1
+        },
+        {
+          "cardId": "S59",
+          "cardType": "Skill",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}

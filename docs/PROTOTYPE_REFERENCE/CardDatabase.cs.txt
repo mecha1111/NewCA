@@ -1,0 +1,59 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+namespace CrossAccel.Data
+{
+    /// <summary>
+    /// StreamingAssets/Data/*.json 을 로드하는 싱글턴 데이터베이스.
+    /// 게임 시작 시 CardDatabase.Load() 한 번 호출하면 됨.
+    /// </summary>
+    public static class CardDatabase
+    {
+        public static IReadOnlyDictionary<string, CharacterData> Characters => _characters;
+        public static IReadOnlyDictionary<string, SkillData> Skills => _skills;
+        public static IReadOnlyList<DeckData> StarterDecks => _decks;
+        public static bool IsLoaded { get; private set; }
+
+        static Dictionary<string, CharacterData> _characters = new();
+        static Dictionary<string, SkillData> _skills = new();
+        static List<DeckData> _decks = new();
+
+        public static void Load()
+        {
+            if (IsLoaded) return;
+            string dir = Path.Combine(Application.streamingAssetsPath, "Data");
+
+            var charList = JsonUtility.FromJson<CharacterDataList>(ReadFile(Path.Combine(dir, "characters.json")));
+            foreach (var c in charList.characters) _characters[c.id] = c;
+
+            var skillList = JsonUtility.FromJson<SkillDataList>(ReadFile(Path.Combine(dir, "skills.json")));
+            foreach (var s in skillList.skills)
+            {
+                // JsonUtility는 없는 필드를 0으로 초기화하므로 skill2 부재를 보정
+                if (string.IsNullOrEmpty(s.skill2Effect) && s.skill2Cost == 0)
+                    s.skill2Cost = int.MinValue;
+                _skills[s.id] = s;
+            }
+
+            var deckList = JsonUtility.FromJson<DeckDataList>(ReadFile(Path.Combine(dir, "starter_decks.json")));
+            _decks = deckList.decks;
+
+            IsLoaded = true;
+            Debug.Log($"[CardDatabase] 로드 완료 — 캐릭터 {_characters.Count}, 스킬 {_skills.Count}, 덱 {_decks.Count}");
+        }
+
+        static string ReadFile(string path)
+        {
+            // Android에서는 StreamingAssets가 jar 안에 있어 UnityWebRequest 필요.
+            // PC/에디터 우선 구현. 모바일 타깃 확정 시 교체.
+            return File.ReadAllText(path);
+        }
+
+        public static CharacterData GetCharacter(string id) =>
+            _characters.TryGetValue(id, out var c) ? c : null;
+
+        public static SkillData GetSkill(string id) =>
+            _skills.TryGetValue(id, out var s) ? s : null;
+    }
+}

@@ -1,0 +1,72 @@
+using System;
+using System.Collections.Generic;
+
+namespace CrossAccel.Data
+{
+    // ===== 원본 데이터 (JSON에서 로드, 불변) =====
+
+    [Serializable]
+    public class CharacterData
+    {
+        public string id;            // C01 ~ C62
+        public string name;
+        public string race;          // 인간, 엘프, 노예, 추격자, 정령 ...
+        public string weaponType;    // 한손검, 두손검, 방패, 스태프, 활, 책, 악기
+        public int maxHp;            // 최대 15
+        public int reach;            // 최대 7
+        public string effectTiming;  // "레디 페이즈 전" 등 — 추후 enum 매핑
+        public string effectText;    // 원문 효과 텍스트 (표시용)
+    }
+
+    [Serializable]
+    public class SkillData
+    {
+        public string id;            // S01 ~ S84
+        public string name;
+        public string weaponType;    // "공용" 또는 "한손검, 활" 처럼 복수 가능
+        public int speed;            // 액션 페이즈 발동 순서 결정 (낮을수록 빠름? → GameRules 참고)
+        public int skill1Cost;       // -1 = 데이터 미정
+        public string skill1Effect;
+        public int skill2Cost = int.MinValue; // int.MinValue = 두 번째 스킬 없음
+        public string skill2Effect;
+
+        public bool HasSecondSkill => skill2Cost != int.MinValue;
+
+        /// <summary>무기 타입 문자열을 파싱 ("스태프, 활" → [스태프, 활])</summary>
+        public List<string> GetWeaponTypes()
+        {
+            var list = new List<string>();
+            foreach (var w in weaponType.Split(','))
+                list.Add(w.Trim().Replace(" ", "")); // "한손 검" 표기 흔들림 정규화
+            return list;
+        }
+
+        public bool CanBeUsedBy(CharacterData ch)
+        {
+            var types = GetWeaponTypes();
+            if (types.Contains("공용")) return true;
+            return types.Contains(ch.weaponType.Replace(" ", ""));
+        }
+    }
+
+    [Serializable]
+    public class DeckEntry
+    {
+        public string cardId;
+        public string cardType;      // Character / Skill / Item
+        public int count;
+    }
+
+    [Serializable]
+    public class DeckData
+    {
+        public string deckName;
+        public List<DeckEntry> cards;
+    }
+
+    // ===== JSON 래퍼 (JsonUtility는 루트 배열을 못 읽음) =====
+
+    [Serializable] public class CharacterDataList { public List<CharacterData> characters; }
+    [Serializable] public class SkillDataList { public List<SkillData> skills; }
+    [Serializable] public class DeckDataList { public List<DeckData> decks; }
+}

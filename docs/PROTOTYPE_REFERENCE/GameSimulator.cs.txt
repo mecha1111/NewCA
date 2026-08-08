@@ -1,0 +1,128 @@
+using System.Collections.Generic;
+using System.Linq;
+using CrossAccel.Core;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>
+    /// AI vs AI 전체 게임 시뮬레이터.
+    /// 씬에 GameManager와 함께 붙이고 재생하면 콘솔 로그로 한 게임이 끝까지 진행됨.
+    /// 목적: 규칙 버그를 UI 없이 가장 빠르게 발견.
+    /// Inspector에서 seed를 바꿔 여러 판 재현 가능.
+    /// </summary>
+    [RequireComponent(typeof(GameManager))]
+    public class GameSimulator : MonoBehaviour
+    {
+        public int seed = 42;
+        public int maxTurns = 30;          // 무한 루프 안전장치
+        public int player0DeckIndex = 0;   // 0 = Aggro
+        public int player1DeckIndex = 1;   // 1 = MidRange_Blood
+
+        GameManager _game;
+        AIController[] _ai;
+        System.Random _rng;
+
+        void Start() => RunSimulation();
+
+        public void RunSimulation()
+        {
+            _game = GetComponent<GameManager>();
+            _rng = new System.Random(seed);
+            _ai = new[] { new AIController(0, _rng), new AIController(1, _rng) };
+
+            CardDatabase.Load();
+            var deck0 = DeckSelection.FromStarter(CardDatabase.StarterDecks[player0DeckIndex]);
+            var deck1 = DeckSelection.FromStarter(CardDatabase.StarterDecks[player1DeckIndex]);
+
+            int winner = -2;
+            _game.OnGameOver += w => winner = w;
+
+            // AI 타겟팅 연결: 처치 가능 우선, 없으면 최저 HP
+            _game.TargetSelector = (user, opp, skillId) =>
+                _ai[user.OwnerId].ChooseTarget(user, opp, expectedDamage: 3);
+
+            _game.StartGame(deck0, deck1, seed);
+
+            // ---- 밴픽 (AI) ----
+            var decks = new[] { new List<string>(deck0.CharacterDeck), new List<string>(deck1.CharacterDeck) };
+            var picks = new[] { new List<string>(), new List<string>() };
+
+            for (int round = 0; round < GameRules.BanRounds; round++)
+            {
+                // 서로의 덱에서 1장 밴
+                for (int p = 0; p < 2; p++)
+                {
+                    string ban = _ai[p].ChooseBan(decks[1 - p]);
+                    decks[1 - p].Remove(ban);
+                    Debug.Log($"[밴픽 R{round + 1}] P{p} 밴 → {CardDatabase.GetCharacter(ban).name}");
+                }
+                // 각자 2장 픽
+                for (int p = 0; p < 2; p++)
+                {
+                    var pick = _ai[p].ChoosePicks(decks[p], picks[p], GameRules.PicksPerRound);
+                    picks[p].AddRange(pick);
+                    Debug.Log($"[밴픽 R{round + 1}] P{p} 픽 → {string.Join(", ", pick.Select(id => CardDatabase.GetCharacter(id).name))}");
+                }
+            }
+
+            var formations = new List<string>[2];
+            var leftovers = new List<string>[2];
+            for (int p = 0; p < 2; p++)
+            {
+                formations[p] = _ai[p].ChooseFormation(picks[p]);
+                leftovers[p] = decks[p].Where(id => !picks[p].Contains(id)).ToList();
+                Debug.Log($"[세팅] P{p} 배치: {string.Join(" → ", formations[p].Select(id => CardDatabase.GetCharacter(id).name))}");
+            }
+            _game.FinishBanPick(formations, leftovers);
+
+            // ---- 멀리건 ----
+            for (int p = 0; p < 2; p++)
+                foreach (var c in _ai[p].ChooseMulliganCost(_game.Players[p]))
+                    _game.Players[p].PlaceCost(c);
+
+            // ---- 턴 루프 ----
+            while (winner == -2 && _game.TurnNumber < maxTurns)
+            {
+                _game.BeginTurn();
+
+                // 드로우 페이즈: 코스트 배치
+                for (int p = 0; p < 2; p++)
+                    foreach (var c in _ai[p].ChooseDrawCost(_game.Players[p], _game.LastDrawn[p]))
+                        _game.Players[p].PlaceCost(c);
+
+                // 레디 페이즈: 카드 제출
+                _game.BeginReadyPhase();
+                for (int p = 0; p < 2; p++)
+                {
+                    var plays = _ai[p].ChoosePlays(_game.Players[p], _game.Players[1 - p]);
+                    foreach (var play in plays)
+                        _game.SubmitActiveCard(p, play.SkillId, play.User, play.AsAccel, false);
+                    Debug.Log($"[레디] P{p}: {plays.Count}장 제출 (코스트 {_game.Players[p].AvailableCost} 보유)");
+                }
+
+                // 액션 + 엔드
+                _game.RunActionPhase();
+
+                LogBoardState();
+            }
+
+            if (winner >= 0)
+                Debug.Log($"🏆 게임 종료 — P{winner} 승리! (턴 {_game.TurnNumber})");
+            else
+                Debug.LogWarning($"⏱ {maxTurns}턴 초과 — 무승부 처리. 밸런스/AI 공격성 점검 필요");
+        }
+
+        void LogBoardState()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                var ps = _game.Players[p];
+                string party = string.Join(" | ", ps.Party.Select(u =>
+                    $"{u.Data.name}(HP {u.CurrentHp}/{u.Data.maxHp}{(u.Armor > 0 ? $"+방{u.Armor}" : "")})"));
+                Debug.Log($"[턴 {_game.TurnNumber} 종료] P{p}: {party} / 패 {ps.Hand.Count} 덱 {ps.MainDeck.Count} 코스트 {ps.AvailableCost}/{ps.CostZone.Count}");
+            }
+        }
+    }
+}

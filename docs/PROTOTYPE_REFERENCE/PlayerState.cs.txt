@@ -1,0 +1,136 @@
+using System.Collections.Generic;
+using System.Linq;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>코스트존 카드 한 장의 상태 (레스트 = 사용됨)</summary>
+    public class CostCard
+    {
+        public string CardId;
+        public bool IsRested;
+    }
+
+    /// <summary>액티브 존에 뒷면으로 놓인 카드</summary>
+    public class ActiveSlot
+    {
+        public string SkillId;
+        public CharacterUnit User;    // 어떤 캐릭터가 사용하는가
+        public bool IsAccel;          // 엑셀 지정 여부
+        public bool IsSwift;          // 신속 지정 여부
+        public bool Revealed;
+    }
+
+    /// <summary>플레이어 한 명의 전체 존 상태</summary>
+    public class PlayerState
+    {
+        public readonly int PlayerId;
+
+        // 존
+        public List<string> MainDeck = new();              // 셔플된 메인덱 (top = index 0)
+        public List<string> Hand = new();
+        public List<string> Trash = new();
+        public List<CostCard> CostZone = new();
+        public List<CharacterUnit> Party = new();          // 캐릭터 존 (Position 순)
+        public List<string> HpCounterCards = new();        // 밴픽에서 안 뽑힌 4장 (HP 표시용)
+        public List<ActiveSlot> ActiveZone = new();
+
+        public PlayerState(int id) => PlayerId = id;
+
+        public bool HasLost => Party.All(u => !u.IsAlive) || Party.Count == 0;
+
+        /// <summary>임시 코스트 (광신도 C21 등 — 이번 턴 한정으로 가정, 규칙 확인 필요)</summary>
+        public int TempCost;
+        /// <summary>이번 턴 아군이 받은 총 데미지 (S13 카운터, S71 등)</summary>
+        public int DamageTakenThisTurn;
+
+        public int AvailableCost => CostZone.Count(c => !c.IsRested) + TempCost;
+
+        // ---- 덱 조작 ----
+
+        public void BuildMainDeck(IEnumerable<(string id, int count)> entries, System.Random rng)
+        {
+            MainDeck.Clear();
+            foreach (var (id, count) in entries)
+                for (int i = 0; i < count; i++)
+                    MainDeck.Add(id);
+            Shuffle(rng);
+        }
+
+        public void Shuffle(System.Random rng)
+        {
+            for (int i = MainDeck.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                (MainDeck[i], MainDeck[j]) = (MainDeck[j], MainDeck[i]);
+            }
+        }
+
+        /// <summary>드로우. 덱이 비면 트래쉬 셔플 후 다시 덱으로 (규칙: 메인덱 0장 시).</summary>
+        public string Draw(System.Random rng)
+        {
+            if (MainDeck.Count == 0)
+            {
+                if (Trash.Count == 0) return null;
+                MainDeck.AddRange(Trash);
+                Trash.Clear();
+                Shuffle(rng);
+                Debug.Log($"[P{PlayerId}] 트래쉬 → 메인덱 셔플");
+            }
+            string card = MainDeck[0];
+            MainDeck.RemoveAt(0);
+            return card;
+        }
+
+        /// <summary>챌린지 전용 덱 탑 공개. ✅ 확정: 챌린지 중에는 트래쉬 재순환 없음.
+        /// 덱이 0장이면 null 반환(= 자동 패배). 드로우와 달리 셔플 부활을 하지 않는다.</summary>
+        public string RevealTopForChallenge()
+        {
+            if (MainDeck.Count == 0) return null;
+            string card = MainDeck[0];
+            MainDeck.RemoveAt(0);
+            return card;
+        }
+
+        // ---- 코스트 ----
+
+        /// <summary>패의 카드를 코스트존에 뒷면으로 배치</summary>
+        public bool PlaceCost(string cardId)
+        {
+            if (!Hand.Remove(cardId)) return false;
+            CostZone.Add(new CostCard { CardId = cardId, IsRested = false });
+            return true;
+        }
+
+        /// <summary>코스트 지불 (임시 코스트 우선 소모 후 레스트). 부족하면 false — 이때 카드 효과는 불발.</summary>
+        public bool PayCost(int amount)
+        {
+            if (AvailableCost < amount) return false;
+            int fromTemp = System.Math.Min(TempCost, amount);
+            TempCost -= fromTemp;
+            int remaining = amount - fromTemp;
+            foreach (var c in CostZone)
+            {
+                if (remaining <= 0) break;
+                if (!c.IsRested) { c.IsRested = true; remaining--; }
+            }
+            return true;
+        }
+
+        /// <summary>턴 시작 리셋 — 코스트 언레스트, 임시코스트/피해량 초기화, 유닛 턴 상태 리셋</summary>
+        public void ResetForNewTurn()
+        {
+            foreach (var c in CostZone) c.IsRested = false; // ✅ 확정 규칙: 매 턴 시작 시 전부 언레스트
+            TempCost = 0;
+            DamageTakenThisTurn = 0;
+            foreach (var u in Party) u.ResetTurnState();
+        }
+
+        /// <summary>턴 시작 시 모든 코스트 언레스트 (스탠드). ✅ 확정 규칙 (ResetForNewTurn에서 호출)</summary>
+        public void UnrestAllCost()
+        {
+            foreach (var c in CostZone) c.IsRested = false;
+        }
+    }
+}

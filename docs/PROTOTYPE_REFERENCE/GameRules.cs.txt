@@ -1,0 +1,59 @@
+namespace CrossAccel.Core
+{
+    /// <summary>설명서 기반 게임 상수. 규칙이 바뀌면 여기만 수정.</summary>
+    public static class GameRules
+    {
+        public const int CharacterDeckSize = 8;     // 밴픽 전 캐릭터 덱
+        public const int BanRounds = 2;             // 밴 1장 + 픽 2장 을 2회 반복
+        public const int PicksPerRound = 2;
+        public const int PartySize = 4;             // 최종 배치 캐릭터 수
+        public const int MainDeckSize = 24;
+        public const int MaxCopiesPerCard = 2;
+        public const int StartingHandSize = 6;
+        public const int StartingCostCards = 2;     // 준비 단계에서 패 → 코스트존
+        public const int DrawPerTurn = 2;
+        public const int MaxCostFromDraw = 2;       // 드로우 페이즈에 코스트존으로 보낼 수 있는 최대
+        public const int MaxHp = 15;
+        public const int MaxReach = 7;
+    }
+
+    /// <summary>게임 전체 흐름</summary>
+    public enum GamePhase
+    {
+        None,
+        BanPick,        // 밴픽: 덱 교환 → 밴 → 픽 (2회 반복)
+        Setup,          // 캐릭터 4장 순서 결정·배치, 남은 4장으로 HP 표시
+        Mulligan,       // 6장 드로우, 2장 코스트존 배치
+        Draw,           // 2장 드로우, 최대 2장 코스트존
+        Ready,          // 사용할 카드 뒷면 배치 + 엑셀 지정
+        Action,         // 엑셀 카드 우선, 속도순 공개·발동
+        End,            // HP 0 캐릭터 → 코스트존, 승패 판정
+        GameOver
+    }
+
+    /// <summary>캐릭터 효과 발동 타이밍 (데이터의 effectTiming 문자열을 매핑)</summary>
+    public enum EffectTiming
+    {
+        None,
+        BeforeReadyPhase,     // 레디 페이즈 전
+        OnReadyPhase,         // 레디 페이즈 시
+        BeforeActionPhase,    // 액션 페이즈 전
+        AfterActionPhase,     // 액션 페이즈 종료 후
+        BeforeSkillActivate,  // 카드 스킬 발동 전
+        AfterSkillActivate,   // 카드 스킬 발동 후
+        OnBattleStart,        // 배틀 페이즈 개시 시
+        OnTurnStart,          // 턴 개시 시
+        OnTurnEnd,            // 턴 종료 시
+        OnEndPhase,           // 엔드 페이즈
+        OnAllyTargeted,       // 아군 스킬의 대상이 되었을 때
+        OnAllyHpLoss,         // 아군 HP 감소 시
+        OnLethalDamage,       // 남은 HP 이상의 데미지를 받을 시
+        OnEnemyAttack,        // 적이 공격 시
+        Passive               // 상시 (타이밍 없음)
+    }
+
+    public enum WeaponType
+    {
+        None, 공용, 한손검, 두손검, 방패, 스태프, 활, 책, 악기
+    }
+}

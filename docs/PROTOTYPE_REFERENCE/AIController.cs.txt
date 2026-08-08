@@ -1,0 +1,179 @@
+using System.Collections.Generic;
+using System.Linq;
+using CrossAccel.Data;
+using UnityEngine;
+
+namespace CrossAccel.Battle
+{
+    /// <summary>
+    /// 휴리스틱 AI. 시뮬레이션(AI vs AI)과 싱글플레이 상대 양쪽에 사용.
+    /// 판단 기준은 단순하게 시작 — 규칙 검증이 목적이므로 강함보다 '합법적인 수'가 우선.
+    /// 이후 평가 함수를 고도화하면 됨.
+    /// </summary>
+    public class AIController
+    {
+        public readonly int PlayerId;
+        readonly System.Random _rng;
+
+        public AIController(int playerId, System.Random rng)
+        {
+            PlayerId = playerId;
+            _rng = rng;
+        }
+
+        // ===================== 밴픽 =====================
+
+        /// <summary>상대 캐릭터 덱에서 1장 밴 — 가장 위협적인(효과 있는 고HP) 카드를 밴</summary>
+        public string ChooseBan(List<string> opponentDeck)
+        {
+            return opponentDeck
+                .Select(id => CardDatabase.GetCharacter(id))
+                .OrderByDescending(c => Score(c))
+                .First().id;
+        }
+
+        /// <summary>자기 덱에서 n장 픽 — 점수 높은 순</summary>
+        public List<string> ChoosePicks(List<string> myDeck, List<string> alreadyPicked, int n)
+        {
+            return myDeck
+                .Where(id => !alreadyPicked.Contains(id))
+                .OrderByDescending(id => Score(CardDatabase.GetCharacter(id)))
+                .Take(n)
+                .ToList();
+        }
+
+        /// <summary>4장의 배치 순서 — 앞: 고HP/짧은 리치(탱커), 뒤: 긴 리치(딜러/서포터)</summary>
+        public List<string> ChooseFormation(List<string> picks)
+        {
+            return picks
+                .OrderByDescending(id => CardDatabase.GetCharacter(id).maxHp * 2
+                                       - CardDatabase.GetCharacter(id).reach)
+                .ToList();
+        }
+
+        int Score(CharacterData c) =>
+            c.maxHp + c.reach + (string.IsNullOrEmpty(c.effectText) || c.effectText == "없음" ? 0 : 4);
+
+        // ===================== 코스트 배치 =====================
+
+        /// <summary>멀리건: 패 6장 중 코스트존으로 보낼 2장 — 내 파티가 못 쓰는 카드 우선</summary>
+        public List<string> ChooseMulliganCost(PlayerState me)
+        {
+            return me.Hand
+                .OrderBy(id => UsableByParty(me, id) ? 1 : 0)   // 못 쓰는 카드 먼저
+                .ThenByDescending(id => SkillCost(id))            // 무거운 카드 먼저
+                .Take(Core.GameRules.StartingCostCards)
+                .ToList();
+        }
+
+        /// <summary>드로우 페이즈: 이번에 뽑은 카드 중 몇 장을 코스트로 보낼까.
+        /// 초반(코스트 4 미만)엔 적극적으로, 이후엔 못 쓰는 카드만.</summary>
+        public List<string> ChooseDrawCost(PlayerState me, List<string> drawn)
+        {
+            var result = new List<string>();
+            foreach (var id in drawn)
+            {
+                bool unusable = !UsableByParty(me, id);
+                bool needRamp = me.CostZone.Count < 4;
+                if (unusable || (needRamp && result.Count < Core.GameRules.MaxCostFromDraw))
+                    result.Add(id);
+                if (result.Count >= Core.GameRules.MaxCostFromDraw) break;
+            }
+            return result;
+        }
+
+        // ===================== 레디 페이즈 =====================
+
+        public struct PlayDecision
+        {
+            public string SkillId;
+            public CharacterUnit User;
+            public bool AsAccel;
+        }
+
+        /// <summary>이번 턴에 낼 카드들 — 지불 가능 코스트 안에서 데미지 효율 순으로 그리디 선택</summary>
+        public List<PlayDecision> ChoosePlays(PlayerState me, PlayerState opp)
+        {
+            var plays = new List<PlayDecision>();
+            int budget = me.AvailableCost;
+
+            var candidates = me.Hand
+                .Select(id => CardDatabase.GetSkill(id))
+                .Where(s => s != null && s.skill1Cost >= 0)
+                .Select(s => new
+                {
+                    skill = s,
+                    user = me.Party.FirstOrDefault(u => u.IsAlive && CanUse(s, u))
+                })
+                .Where(x => x.user != null)
+                .OrderByDescending(x => Value(x.skill) - x.skill.skill1Cost * 0.5f)
+                .ToList();
+
+            int accelBudget = me.Party.Sum(u => u.AccelTokens);
+            var usedCards = new HashSet<string>();
+
+            foreach (var c in candidates)
+            {
+                if (usedCards.Contains(c.skill.id)) continue; // 같은 ID 중복 사용 단순 방지
+                if (c.skill.skill1Cost > budget) continue;
+                budget -= c.skill.skill1Cost;
+                bool accel = accelBudget > 0;
+                if (accel) accelBudget--;
+                plays.Add(new PlayDecision { SkillId = c.skill.id, User = c.user, AsAccel = accel });
+                usedCards.Add(c.skill.id);
+                if (plays.Count >= me.Party.Count(u => u.IsAlive)) break; // 캐릭터 수만큼만 (가정)
+            }
+            return plays;
+        }
+
+        /// <summary>스킬 가치 대략 평가 — 효과 텍스트에서 데미지/회복 수치 추출 시도</summary>
+        float Value(SkillData s)
+        {
+            float v = 1f;
+            var text = s.skill1Effect ?? "";
+            var m = System.Text.RegularExpressions.Regex.Match(text, @"데미지\s*(\d+)");
+            if (m.Success) v += int.Parse(m.Groups[1].Value) * 2f;
+            m = System.Text.RegularExpressions.Regex.Match(text, @"회복\s*(\d+)");
+            if (m.Success) v += int.Parse(m.Groups[1].Value);
+            m = System.Text.RegularExpressions.Regex.Match(text, @"방어도\s*(\d+)");
+            if (m.Success) v += int.Parse(m.Groups[1].Value);
+            v += s.speed * 0.3f; // 속도 높음 = 선공 이점 (확정 규칙: 높을수록 빠름)
+            return v;
+        }
+
+        // ===================== 타겟팅 =====================
+
+        /// <summary>리치 내에서 처치 가능한 적 우선, 없으면 최저 HP</summary>
+        public CharacterUnit ChooseTarget(CharacterUnit user, PlayerState opp, int expectedDamage)
+        {
+            var reachable = opp.Party.Where(u => u.IsAlive && user.CanReach(u.Position)).ToList();
+            if (reachable.Count == 0) return null;
+            var killable = reachable.Where(u => u.CurrentHp + u.Armor <= expectedDamage)
+                                    .OrderByDescending(u => u.Data.maxHp).FirstOrDefault();
+            return killable ?? reachable.OrderBy(u => u.CurrentHp).First();
+        }
+
+        bool UsableByParty(PlayerState me, string skillId)
+        {
+            var s = CardDatabase.GetSkill(skillId);
+            if (s == null) return false;
+            return me.Party.Any(u => u.IsAlive && CanUse(s, u));
+        }
+
+        /// <summary>유닛 단위 사용 가능 판정 — C24처럼 추가 무기가 부여된 경우 반영</summary>
+        public static bool CanUse(SkillData s, CharacterUnit u)
+        {
+            if (s.CanBeUsedBy(u.Data)) return true;
+            var types = s.GetWeaponTypes();
+            foreach (var extra in u.ExtraWeapons)
+                if (types.Contains(extra)) return true;
+            return false;
+        }
+
+        int SkillCost(string id)
+        {
+            var s = CardDatabase.GetSkill(id);
+            return s == null || s.skill1Cost < 0 ? 0 : s.skill1Cost;
+        }
+    }
+}
