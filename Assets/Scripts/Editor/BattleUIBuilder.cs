@@ -326,6 +326,8 @@ namespace CrossAccel.EditorTools
         {
             foreach (var card in canvasTf.GetComponentsInChildren<CharacterCardView>(includeInactive: true))
                 card.HoverPreview = preview;
+            foreach (var card in canvasTf.GetComponentsInChildren<SkillCardView>(includeInactive: true))
+                card.HoverPreview = preview;
         }
 
         // ===================== 캐릭터 존 / 액트 존 (SPEC 3번 표 2) =====================

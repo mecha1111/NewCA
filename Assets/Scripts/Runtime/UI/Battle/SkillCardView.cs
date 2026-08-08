@@ -21,6 +21,21 @@ namespace CrossAccel.UI
         private Image _background;
         private Button _button;
 
+        private SkillData _boundSkill;
+
+        /// <summary>
+        /// [무엇] 마우스를 올렸을 때 이 스킬의 데이터를 띄워줄 프리뷰. 없으면 호버해도 패널이 안 뜬다.
+        /// [왜] 손패 카드는 작아서 효과 전문이 잘린다. 좌측 CardHoverPreview에 전문을 넘긴다.
+        /// [주의] 직렬화 필드로 둔다. auto-property는 씬에 저장되지 않는다.
+        ///        손패는 빌더가 미리 만들어 두지만, BattleUIController가 런타임에도 다시 꽂아 준다.
+        /// </summary>
+        [SerializeField] private CardHoverPreview _hoverPreview;
+        public CardHoverPreview HoverPreview
+        {
+            get => _hoverPreview;
+            set => _hoverPreview = value;
+        }
+
         /// <summary>손패(PlayerState.Hand) 안에서의 인덱스.</summary>
         public int HandIndex { get; private set; }
 
@@ -39,12 +54,15 @@ namespace CrossAccel.UI
             _button.onClick.AddListener(() => Clicked?.Invoke(HandIndex));
         }
 
+        
+
         /// <summary>
         /// 카드를 표시한다. playable=false면 클릭이 막히고 흐리게 보인다
         /// (이 스킬을 쓸 수 있는 캐릭터가 파티에 없거나, 지금이 레디 페이즈가 아닐 때).
         /// </summary>
         public void Bind(SkillData skill, int handIndex, bool playable)
         {
+            _boundSkill = skill;
             HandIndex = handIndex;
 
             if (_nameText != null) _nameText.text = skill.Name;
@@ -116,17 +134,21 @@ namespace CrossAccel.UI
         /// </summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
+            // [주의] 사용 불가(흐림) 카드도 효과 전문은 볼 수 있어야 한다 — 프리뷰는 playable과 분리한다.
+            HoverPreview?.Show(_boundSkill);
+
             if (!_playable) return; // 못 쓰는 카드는 들어올리지 않는다(흐림 상태 유지)
 
             CaptureRest();
             _hovering = true;
-            transform.SetAsLastSibling(); // 프로토타입 z-index:50 — 이웃 카드 위로 올라온다
+            transform.SetAsLastSibling();
             StartHoverTween(_restPosition + new Vector2(0f, HoverLift), Vector3.zero, HoverScale);
         }
 
-        /// <summary>[무엇] 마우스가 벗어나면 제자리·원래 기울기로 돌아간다.</summary>
         public void OnPointerExit(PointerEventData eventData)
         {
+            HoverPreview?.Hide();
+
             if (!_restCaptured || !_hovering) return;
 
             _hovering = false;

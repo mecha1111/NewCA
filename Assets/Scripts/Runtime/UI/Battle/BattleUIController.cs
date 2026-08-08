@@ -167,6 +167,7 @@ namespace CrossAccel.UI
             _swift.InitializeFrom(_game.Players[BattleSession.MyPlayerId].CharacterZone);
             if (_swift.Max > 0) AddLog($"신속 자원 {_swift.Max} 보유");
 
+            WireHoverPreviews();
             WireInput();
 
             // 초기 코스트: 손패 6장을 뽑고 그중 2장을 골라 코스트로 버린다 (프로토타입 startCost).
@@ -203,8 +204,32 @@ namespace CrossAccel.UI
             };
         }
 
+        /// <summary>
+        /// [무엇] PreviewPanel을 찾아 손패·캐릭터 카드에 꽂는다.
+        /// [왜] HoverPreview는 예전 auto-property라 씬에 저장되지 않았다. 런타임 배선이 안전망이다.
+        /// [주의] 손패(SkillCardView)는 빌더 WireHoverPreview에 원래 없었고, 여기서 반드시 연결해야 한다.
+        /// </summary>
+        private void WireHoverPreviews()
+        {
+            var preview = transform.Find("PreviewPanel")?.GetComponent<CardHoverPreview>();
+            if (preview == null) return;
+
+            if (_handCards != null)
+            {
+                foreach (var card in _handCards)
+                    if (card != null) card.HoverPreview = preview;
+            }
+
+            for (int i = 0; i < GameRules.PartySize; i++)
+            {
+                if (_myCards[i] != null) _myCards[i].HoverPreview = preview;
+                if (_opponentCards[i] != null) _opponentCards[i].HoverPreview = preview;
+            }
+        }
+
         private void WireInput()
         {
+
             if (_nextButton != null) _nextButton.onClick.AddListener(OnNextButton);
 
             if (_handCards != null)

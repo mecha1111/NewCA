@@ -259,6 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &11268458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3211,6 +3212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &256835709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3316,6 +3318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &263891269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3787,6 +3790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &297410631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4532,6 +4536,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &380246212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6599,6 +6604,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &536006787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7272,6 +7278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &564865282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9026,7 +9033,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -13019,6 +13026,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &933277407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13271,6 +13279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &954983872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13451,6 +13460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &971278120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14436,6 +14446,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1045331552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14767,6 +14778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1064472566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15403,7 +15415,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -15886,6 +15898,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1138348262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16732,7 +16745,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -17005,6 +17018,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1211944070
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17754,6 +17768,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1226143247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18920,6 +18935,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1302595090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19119,7 +19135,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -20116,7 +20132,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -23551,7 +23567,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -24321,6 +24337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1686156091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25542,7 +25559,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
   m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -26370,6 +26387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1777498736
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27722,7 +27740,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -28054,6 +28072,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1920220630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29181,6 +29200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _hoverPreview: {fileID: 146530884}
 --- !u!114 &1974566221
 MonoBehaviour:
   m_ObjectHideFlags: 0
