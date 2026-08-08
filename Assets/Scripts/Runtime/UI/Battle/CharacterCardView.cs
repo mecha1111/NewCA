@@ -28,6 +28,8 @@ namespace CrossAccel.UI
         private TextMeshProUGUI _effectText;
         private TextMeshProUGUI _nameText;
         private TextMeshProUGUI _footerText;
+        [SerializeField] private CardHoverPreview _hoverPreview;
+
 
         private bool _built;
         private CharacterData _boundData;
@@ -39,8 +41,15 @@ namespace CrossAccel.UI
         /// [무엇] 마우스를 올렸을 때 이 카드의 데이터를 띄워줄 프리뷰. 없으면(null) 호버해도 아무 일도 없다.
         /// [왜] 씬 빌더가 CardHoverPreview 하나를 만들고 모든 카드에 나눠 꽂아준다 — 카드 자신은
         ///      프리뷰를 어디에 만들지 몰라도 되게 하려고 참조를 주입받는 방식으로 뒀다.
+        /// [주의] 반드시 직렬화 필드로 둔다. auto-property는 Unity가 씬에 저장하지 않아
+        ///        빌더가 꽂아도 Play 시 null이 된다.
         /// </summary>
-        public CardHoverPreview HoverPreview { get; set; }
+      
+        public CardHoverPreview HoverPreview
+        {
+            get => _hoverPreview;
+            set => _hoverPreview = value;
+        }
 
         /// <summary>
         /// [무엇] 이 카드에 마우스가 올라왔다/벗어났다.

@@ -81,8 +81,17 @@ namespace CrossAccel.UI
         /// <summary>[무엇] 카드 클릭 (인자=Index). [주의] 클릭 불가 상태면 발생하지 않는다.</summary>
         public event Action<int> Clicked;
 
-        /// <summary>[무엇] 마우스를 올렸을 때 이 카드의 데이터를 띄워줄 프리뷰(작업 4). 없으면 아무 일도 없다.</summary>
-        public CardHoverPreview HoverPreview { get; set; }
+        /// <summary>
+        /// [무엇] 마우스를 올렸을 때 이 카드의 데이터를 띄워줄 프리뷰(작업 4). 없으면 아무 일도 없다.
+        /// [주의] 반드시 직렬화 필드로 둔다. auto-property는 Unity가 씬에 저장하지 않아
+        ///        빌더가 꽂아도 Play 시 null이 된다.
+        /// </summary>
+        [SerializeField] private CardHoverPreview _hoverPreview;
+        public CardHoverPreview HoverPreview
+        {
+            get => _hoverPreview;
+            set => _hoverPreview = value;
+        }
 
         public void OnPointerEnter(PointerEventData eventData) => HoverPreview?.Show(_boundData);
         public void OnPointerExit(PointerEventData eventData) => HoverPreview?.Hide();

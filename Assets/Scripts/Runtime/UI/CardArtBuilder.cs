@@ -9,7 +9,7 @@ namespace CrossAccel.UI
     /// [왜] CharacterCardView(배틀 카드)와 BanPickCardView(밴픽 카드)가 "프레임/일러스트/스크림+텍스트"
     ///      3레이어를 같은 방식으로 조립해야 한다(밴픽 카드 3레이어화 지시, UNITY_PORTING_SPEC 5절).
     ///      원래 CharacterCardView 안에 있던 private 헬퍼를 꺼내 공용화한 것 — 로직 변경 없음.
-    /// [주의] scale은 항상 <see cref="CardArt.Scale"/>(폭 기준 단일 배율)을 써야 한다. 폭·높이를
+    /// [주의] scale은 항상 <see_cref="CardArt.Scale"/>(폭 기준 단일 배율)을 써야 한다. 폭·높이를
     ///        따로 배율화하면 카드가 왜곡된다(CARD_UI_FIX_SPEC.md "비율 0.6545 고정, 왜곡 금지").
     /// </summary>
     internal static class CardArtBuilder
@@ -67,7 +67,7 @@ namespace CrossAccel.UI
             text.color = color;
             text.alignment = alignment;
             text.raycastTarget = false;
-            text.enableWordWrapping = true;
+            text.textWrappingMode = TextWrappingModes.Normal;
             text.overflowMode = TextOverflowModes.Truncate;
             return text;
         }

@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace CrossAccel.UI
 {
     /// <summary>
@@ -58,6 +59,8 @@ namespace CrossAccel.UI
         private Image _illustration;
         private TextMeshProUGUI _hpValueText;
         private TextMeshProUGUI _reachValueText;
+        private TextMeshProUGUI _hpLabelText;
+        private TextMeshProUGUI _reachLabelText;
         private TextMeshProUGUI _nameText;
         private TextMeshProUGUI _tagsText;
         private TextMeshProUGUI _effectText;
@@ -108,8 +111,8 @@ namespace CrossAccel.UI
             _illustration = CreateBox("Illustration", rect, ArtInset, ArtInset, PanelWidth - ArtInset * 2f, artHeight);
             _illustration.gameObject.SetActive(false);
 
-            _hpValueText = CreateHex("HpHex", rect, HexSideMargin, HpColor, "체력", font, out _);
-            _reachValueText = CreateHex("ReachHex", rect, PanelWidth - HexSideMargin - HexWidth, ReachColor, "리치", font, out _);
+            _hpValueText = CreateHex("HpHex", rect, HexSideMargin, HpColor, "체력", font, out _hpLabelText);
+            _reachValueText = CreateHex("ReachHex", rect, PanelWidth - HexSideMargin - HexWidth, ReachColor, "리치", font, out _reachLabelText);
 
             float nameTop = PanelHeight * NameTopRatio;
             _nameText = CreateLabel("NameText", rect, 0, nameTop, PanelWidth, NameHeight, 21, NameColor, font, FontStyles.Bold);
@@ -181,7 +184,7 @@ namespace CrossAccel.UI
             text.fontStyle = style;
             text.alignment = TextAlignmentOptions.Center;
             text.raycastTarget = false;
-            text.enableWordWrapping = true;
+            text.textWrappingMode = TextWrappingModes.Normal;
             return text;
         }
 
@@ -189,7 +192,9 @@ namespace CrossAccel.UI
         {
             _illustration = transform.Find("Illustration")?.GetComponent<Image>();
             _hpValueText = transform.Find("HpHex/Value")?.GetComponent<TextMeshProUGUI>();
+            _hpLabelText = transform.Find("HpHex/Label")?.GetComponent<TextMeshProUGUI>();
             _reachValueText = transform.Find("ReachHex/Value")?.GetComponent<TextMeshProUGUI>();
+            _reachLabelText = transform.Find("ReachHex/Label")?.GetComponent<TextMeshProUGUI>();
             _nameText = transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
             _tagsText = transform.Find("TagsText")?.GetComponent<TextMeshProUGUI>();
             _effectText = transform.Find("EffectBox/Value")?.GetComponent<TextMeshProUGUI>();
@@ -213,11 +218,49 @@ namespace CrossAccel.UI
             _illustration.gameObject.SetActive(illustration != null);
             if (illustration != null) _illustration.sprite = illustration;
 
+            // 캐릭터 모드: 체력 / 리치
+            if (_hpLabelText != null) _hpLabelText.text = "체력";
+            if (_reachLabelText != null) _reachLabelText.text = "리치";
             _hpValueText.text = data.MaxHp.ToString();
             _reachValueText.text = data.Reach.ToString();
             _nameText.text = data.Name;
             _tagsText.text = $"{data.Race} · {data.WeaponType}";
             _effectText.text = data.HasEffect ? data.EffectText : "";
+        }
+
+        /// <summary>
+        /// [무엇] 손패 스킬 카드 호버 시 호출 — 같은 좌측 패널에 코스트·속도·효과 전문을 띄운다.
+        /// [왜] 손패 카드(132×203)는 효과 전문이 잘린다. 캐릭터 프리뷰와 같은 패널을 재사용해
+        ///      위치·크기를 하나로 유지한다(full_prototype.html .pv-panel 공용).
+        /// [주의] 스킬은 HP/리치가 없다. 왼쪽 육각=코스트, 오른쪽 육각=속도로 라벨만 바꿔 쓴다.
+        ///        일러스트 라이브러리에 스킬 아트가 없으므로 Illustration은 끈다.
+        ///        CostCircle/SpeedCircle은 손패 카드용이라 프리뷰에 없다 — HpHex/ReachHex를 재사용한다.
+        /// </summary>
+        public void Show(SkillData skill)
+        {
+            if (skill == null) { Hide(); return; }
+            EnsureBuilt();
+            gameObject.SetActive(true);
+
+            _illustration.gameObject.SetActive(false);
+
+            // 스킬 모드: 기존 육각(체력/리치)을 코스트/속도로 라벨만 바꿔 재사용
+            if (_hpLabelText != null) _hpLabelText.text = "코스트";
+            if (_reachLabelText != null) _reachLabelText.text = "속도";
+            _hpValueText.text = skill.Skill1Cost < 0 ? "X" : skill.Skill1Cost.ToString();
+            _reachValueText.text = skill.Speed.ToString();
+            _nameText.text = skill.Name;
+            _tagsText.text = string.IsNullOrEmpty(skill.WeaponType) ? "" : skill.WeaponType;
+
+            string effect = skill.Skill1Effect ?? "";
+            if (skill.HasSkill2 && !string.IsNullOrEmpty(skill.Skill2Effect))
+            {
+                string cost2 = skill.Skill2Cost.HasValue && skill.Skill2Cost.Value < 0
+                    ? "X"
+                    : (skill.Skill2Cost?.ToString() ?? "");
+                effect += $"\n\n[스킬2 · 코스트 {cost2}]\n{skill.Skill2Effect}";
+            }
+            _effectText.text = effect;
         }
 
         /// <summary>[무엇] 마우스가 카드를 벗어나면 숨긴다.</summary>
