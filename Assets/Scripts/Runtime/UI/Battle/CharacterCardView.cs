@@ -44,7 +44,7 @@ namespace CrossAccel.UI
         /// [주의] 반드시 직렬화 필드로 둔다. auto-property는 Unity가 씬에 저장하지 않아
         ///        빌더가 꽂아도 Play 시 null이 된다.
         /// </summary>
-      
+
         public CardHoverPreview HoverPreview
         {
             get => _hoverPreview;
