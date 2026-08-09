@@ -605,6 +605,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &40878536
 MonoBehaviour:
@@ -2219,6 +2235,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &269608219
 MonoBehaviour:
@@ -3871,6 +3903,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &474850445
 MonoBehaviour:
@@ -8300,6 +8348,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 988117658}
   m_CullTransparentMesh: 1
+--- !u!1 &999095392
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 999095393}
+  - component: {fileID: 999095394}
+  m_Layer: 0
+  m_Name: Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &999095393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999095392}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1099.5309, y: 561.1117, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &999095394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999095392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42ccfbc4f17f19f4486b3c1da010e140, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card_Manager
+  Character: {fileID: 6599463592699233169, guid: 643073229de3026459b50e6358c4dd80, type: 3}
 --- !u!1 &1003370918
 GameObject:
   m_ObjectHideFlags: 0
@@ -8519,6 +8612,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1005991424
 MonoBehaviour:
@@ -11791,6 +11900,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1360741737
 MonoBehaviour:
@@ -12188,6 +12313,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1407871496
 MonoBehaviour:
@@ -13434,6 +13575,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1520179110
 MonoBehaviour:
@@ -15943,6 +16100,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1784223228
 MonoBehaviour:
@@ -17401,6 +17574,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &1945221810
 MonoBehaviour:
@@ -18554,6 +18743,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a74c5b4491a4fd2927fdd5dc0e45ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CrossAccel.Runtime::CrossAccel.UI.BanPickCardView
+  _canvasObject: {fileID: 0}
+  _frame: {fileID: 0}
+  _illustration: {fileID: 0}
+  _bottomScrim: {fileID: 0}
+  _highlight: {fileID: 0}
+  _clickCatcher: {fileID: 0}
+  _nameText: {fileID: 0}
+  _hpValueText: {fileID: 0}
+  _reachValueText: {fileID: 0}
+  _weaponTagText: {fileID: 0}
+  _raceTagText: {fileID: 0}
+  _banOverlay: {fileID: 0}
+  _banLabelText: {fileID: 0}
+  _pickMark: {fileID: 0}
+  _statusLabelBox: {fileID: 0}
+  _statusLabelText: {fileID: 0}
   _hoverPreview: {fileID: 146530884}
 --- !u!114 &2107338715
 MonoBehaviour:
@@ -19034,3 +19239,4 @@ SceneRoots:
   - {fileID: 1745408565}
   - {fileID: 540420019}
   - {fileID: 912641303}
+  - {fileID: 999095393}
