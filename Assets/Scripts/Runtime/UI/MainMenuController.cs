@@ -19,7 +19,7 @@ namespace CrossAccel.UI
             BattleSession.Reset();
 
             // 게임은 밴픽부터 시작한다 (예전엔 BattleScene을 직접 열어 밴픽을 건너뛰었다).
-            SceneManager.LoadScene(BanPickFlow.BanSceneName);
+            SceneManager.LoadScene("SelectDeck");
         }
     }
 }

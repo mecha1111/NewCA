@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CrossAccel.Battle;
 using CrossAccel.Core;
 using CrossAccel.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CrossAccel.UI
@@ -44,8 +44,48 @@ namespace CrossAccel.UI
         public const int MyPlayerId = 0;
         public const int EnemyPlayerId = 1;
 
-        private const string MyDeckName = "Aggro";
+        /// <summary>덱 선택 화면을 거치지 않았을 때 쓰는 기본 내 덱.</summary>
+        private const string DefaultMyDeckName = "Aggro";
+
+        /// <summary>상대(AI) 덱. 지금은 선택 UI 없이 고정.</summary>
         private const string EnemyDeckName = "MidRange_Blood";
+
+        /// <summary>
+        /// [무엇] 이번 판의 내 덱 이름.
+        /// [왜] 덱 선택 화면(DeckSelectController)에서 고른 스타터를 밴픽·메인덱 구성에 반영한다.
+        /// [주의] EnsureStarted 시점에 한 번 정해지고, Reset 전까지 유지된다.
+        /// </summary>
+        public static string ActiveMyDeckName { get; private set; } = DefaultMyDeckName;
+
+        /// <summary>
+        /// [무엇] 내 덱 이름을 결정한다. 선택 화면 값 우선, 없으면 Aggro.
+        /// [주의] 이름이 StarterDecks.json에 없으면 아래에서 First 조회가 실패하므로
+        ///        존재하지 않는 이름이면 기본값으로 되돌린다.
+        /// </summary>
+        private static string ResolveMyDeckName(CardDatabase db)
+        {
+            string chosen = DeckSelectController.SelectedDeckName;
+            if (string.IsNullOrEmpty(chosen))
+                chosen = DefaultMyDeckName;
+
+            bool exists = false;
+            for (int i = 0; i < db.Decks.Count; i++)
+            {
+                if (db.Decks[i].DeckName == chosen)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+            {
+                Debug.LogWarning($"[BanPick] 선택 덱 '{chosen}'이(가) 없어 '{DefaultMyDeckName}'로 대체한다.");
+                chosen = DefaultMyDeckName;
+            }
+
+            return chosen;
+        }
 
         /// <summary>
         /// 진행 순서 — RULES.md 4번 그대로: 2라운드, 라운드마다 (상대 덱에서 1장 밴) → (자기 덱에서 2장 픽).
@@ -96,7 +136,7 @@ namespace CrossAccel.UI
 
         /// <summary>
         /// 세션이 아직 없으면 시작한다 (씬 컨트롤러가 Start마다 안전하게 호출).
-        /// GameManager를 만들고 두 스타터 덱을 넣어 밴픽 준비 상태로 만든다.
+        /// GameManager를 만들고 내 선택 덱 + 상대 고정 덱을 넣어 밴픽 준비 상태로 만든다.
         /// </summary>
         public static void EnsureStarted()
         {
@@ -107,14 +147,18 @@ namespace CrossAccel.UI
             // ARCHITECTURE.md: 난수는 시드 주입. UI는 매판 달라야 하므로 시드를 만들어 쓰되 로그로 남겨 재현 가능하게.
             int seed = Environment.TickCount;
             var rng = new System.Random(seed);
-            Debug.Log($"[BanPick] 세션 시작 (seed={seed})");
 
-            MyPool = LoadPool(db, MyDeckName);
+            string myDeckName = ResolveMyDeckName(db);
+            ActiveMyDeckName = myDeckName;
+
+            Debug.Log($"[BanPick] 세션 시작 (seed={seed}, myDeck={myDeckName}, enemyDeck={EnemyDeckName})");
+
+            MyPool = LoadPool(db, myDeckName);
             EnemyPool = LoadPool(db, EnemyDeckName);
 
             Game = new GameManager(db, rng) { Log = message => Debug.Log($"[GameManager] {message}") };
             Game.StartGame(
-                DeckSelection.FromDeckData(db.Decks.First(d => d.DeckName == MyDeckName)),
+                DeckSelection.FromDeckData(db.Decks.First(d => d.DeckName == myDeckName)),
                 DeckSelection.FromDeckData(db.Decks.First(d => d.DeckName == EnemyDeckName)));
 
             _enemyAi = new AIController(EnemyPlayerId, db, rng);
@@ -291,6 +335,7 @@ namespace CrossAccel.UI
             _enemyAi = null;
             Game = null;
             _started = false;
+            ActiveMyDeckName = DefaultMyDeckName; // 추가
         }
     }
 }

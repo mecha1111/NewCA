@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 24663f0c838484a56a58b4f96afb1943
+guid: 9f158aa1cd1e0464fbb9106150a9b9c7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1403857545996366100
-    second: bottom_scrim_0
+      213: -3581571153033790751
+    second: C25_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -101,7 +101,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bottom_scrim_0
+      name: C25_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 4
-        height: 511
+        y: 71
+        width: 1000
+        height: 1399
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cee82a7fffe748ce0800000000000000
-      internalID: -1403857545996366100
+      spriteID: 1ea72a52304bb4ec0800000000000000
+      internalID: -3581571153033790751
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bottom_scrim_0: -1403857545996366100
+      C25_0: -3581571153033790751
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

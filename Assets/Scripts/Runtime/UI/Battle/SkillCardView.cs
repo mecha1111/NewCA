@@ -1,6 +1,6 @@
+using CrossAccel.Data;
 using System;
 using System.Collections;
-using CrossAccel.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -53,8 +53,6 @@ namespace CrossAccel.UI
             _button = GetComponent<Button>();
             _button.onClick.AddListener(() => Clicked?.Invoke(HandIndex));
         }
-
-        
 
         /// <summary>
         /// 카드를 표시한다. playable=false면 클릭이 막히고 흐리게 보인다
@@ -118,10 +116,13 @@ namespace CrossAccel.UI
         /// <summary>확대/복귀 트윈 시간. [출처] .hcard transition .18s</summary>
         private const float HoverTweenMs = 180f;
 
-        private Vector2 _restPosition;
-        private Vector3 _restRotation;
-        private int _restSiblingIndex;
-        private bool _restCaptured;
+        // [주의] 제자리는 "지금 화면 좌표"를 CaptureRest로 찍지 않는다.
+        //        복귀 트윈 중 재호버하면 떠 있는 높이가 제자리로 굳어 계단처럼 올라간다.
+        //        HandFanLayout이 넣어 준 좌표(_layout*)만 진실로 쓴다.
+        private Vector2 _layoutPosition;
+        private Vector3 _layoutRotation;
+        private int _layoutSiblingIndex;
+        private bool _hasLayout;
         private bool _hovering;
         private Coroutine _hoverTween;
 
@@ -129,46 +130,41 @@ namespace CrossAccel.UI
         /// [무엇] 손패 카드에 마우스가 올라오면 위로 떠오르며 커지고, 부채꼴 기울기를 편다.
         /// [왜] 부채꼴로 겹쳐 있어 카드 내용이 서로 가려진다 — 프로토타입도 호버 시 들어올려
         ///      그 한 장만 온전히 보이게 한다.
-        /// [주의] 제자리 좌표는 HandFanLayout이 정한다. 여기서는 "지금 위치"를 복귀 지점으로 기억해
-        ///        두고 벗어날 때 되돌린다 — 레이아웃 계산을 다시 하지 않는다.
+        /// [주의] 목표 높이는 항상 layout + HoverLift. 현재 시각 좌표에 Lift를 더하지 않는다.
         /// </summary>
         public void OnPointerEnter(PointerEventData eventData)
         {
             // [주의] 사용 불가(흐림) 카드도 효과 전문은 볼 수 있어야 한다 — 프리뷰는 playable과 분리한다.
             HoverPreview?.Show(_boundSkill);
 
-            if (!_playable) return; // 못 쓰는 카드는 들어올리지 않는다(흐림 상태 유지)
+            if (!_playable) return;
+            if (!_hasLayout) return;
 
-            CaptureRest();
             _hovering = true;
             transform.SetAsLastSibling();
-            StartHoverTween(_restPosition + new Vector2(0f, HoverLift), Vector3.zero, HoverScale);
+            StartHoverTween(_layoutPosition + new Vector2(0f, HoverLift), Vector3.zero, HoverScale);
         }
 
+        /// <summary>
+        /// [무엇] 마우스가 벗어나면 레이아웃 제자리·원래 기울기로 돌아간다.
+        /// [주의] 복귀 목표는 layout 고정값이라, 복귀 트윈 중 다시 Enter해도 더 위로 쌓이지 않는다.
+        /// </summary>
         public void OnPointerExit(PointerEventData eventData)
         {
             HoverPreview?.Hide();
 
-            if (!_restCaptured || !_hovering) return;
+            if (!_hovering) return;
 
             _hovering = false;
-            transform.SetSiblingIndex(_restSiblingIndex);
-            StartHoverTween(_restPosition, _restRotation, 1f);
-        }
-
-        /// <summary>
-        /// 제자리 좌표를 기억한다.
-        /// [주의] 호버 중이 아닐 때만 갱신한다 — 떠 있는 상태를 "제자리"로 잘못 기억하면
-        ///        카드가 점점 위로 올라가 버린다.
-        /// </summary>
-        private void CaptureRest()
-        {
-            if (_hovering) return;
-            var rt = (RectTransform)transform;
-            _restPosition = rt.anchoredPosition;
-            _restRotation = rt.localEulerAngles;
-            _restSiblingIndex = rt.GetSiblingIndex();
-            _restCaptured = true;
+            if (_hasLayout)
+            {
+                transform.SetSiblingIndex(_layoutSiblingIndex);
+                StartHoverTween(_layoutPosition, _layoutRotation, 1f);
+            }
+            else
+            {
+                SnapToLayoutOrIdentity();
+            }
         }
 
         private void StartHoverTween(Vector2 targetPosition, Vector3 targetRotation, float targetScale)
@@ -206,15 +202,76 @@ namespace CrossAccel.UI
         }
 
         /// <summary>
-        /// [무엇] HandFanLayout이 카드를 다시 배치했을 때 호출 — 기억해둔 제자리를 새 좌표로 갱신한다.
-        /// [왜] 손패가 바뀌면(카드를 내거나 뽑으면) 부채꼴이 다시 깔린다. 그때 예전 제자리로
-        ///      되돌아가면 카드가 엉뚱한 곳에 놓인다.
+        /// [무엇] HandFanLayout이 카드를 다시 배치한 직후 호출 — 레이아웃 좌표를 제자리로 확정한다.
+        /// [왜] 손패가 바뀌면 부채꼴이 다시 깔린다. 호버 목표/복귀 목표는 이 값만 쓴다.
+        /// [주의] 진행 중 트윈을 끊는다. 호버 중이면 새 레이아웃 기준으로 다시 띄운다.
+        ///        위치·회전은 HandFanLayout이 이미 써 둔 뒤라 여기서 읽기만 한다.
         /// </summary>
         public void OnLayoutMoved()
         {
-            _hovering = false;
-            _restCaptured = false;
             var rt = (RectTransform)transform;
+            _layoutPosition = rt.anchoredPosition;
+            _layoutRotation = rt.localEulerAngles;
+            _layoutSiblingIndex = rt.GetSiblingIndex();
+            _hasLayout = true;
+
+            if (_hoverTween != null)
+            {
+                StopCoroutine(_hoverTween);
+                _hoverTween = null;
+            }
+
+            if (_hovering && _playable)
+            {
+                rt.anchoredPosition = _layoutPosition + new Vector2(0f, HoverLift);
+                rt.localEulerAngles = Vector3.zero;
+                rt.localScale = Vector3.one * HoverScale;
+                transform.SetAsLastSibling();
+            }
+            else
+            {
+                _hovering = false;
+                rt.localScale = Vector3.one;
+            }
+        }
+
+        /// <summary>
+        /// [무엇] 비활성화 시 호버 잔상(떠 있는 좌표·스케일)을 남기지 않는다.
+        /// [왜] 카드가 꺼졌다가 다시 켜질 때 이전 높이가 남으면 같은 버그가 재발한다.
+        /// [주의] 여기에서는 SetSiblingIndex를 호출하지 않는다.
+        ///        부모가 활성/비활성 전환 중일 때 sibling을 바꾸면 Unity가 예외를 던진다
+        ///        (HandContainer가 카드를 끄며 Layout 할 때 재현).
+        /// </summary>
+        private void OnDisable()
+        {
+            if (_hoverTween != null)
+            {
+                StopCoroutine(_hoverTween);
+                _hoverTween = null;
+            }
+
+            _hovering = false;
+
+            var rt = (RectTransform)transform;
+            if (_hasLayout)
+            {
+                rt.anchoredPosition = _layoutPosition;
+                rt.localEulerAngles = _layoutRotation;
+            }
+            rt.localScale = Vector3.one;
+        }
+
+        private void SnapToLayoutOrIdentity()
+        {
+            var rt = (RectTransform)transform;
+            if (_hasLayout)
+            {
+                rt.anchoredPosition = _layoutPosition;
+                rt.localEulerAngles = _layoutRotation;
+                // active일 때만 sibling 복구 — 비활성 전환 중 호출을 막는다.
+                if (gameObject.activeInHierarchy)
+                    rt.SetSiblingIndex(_layoutSiblingIndex);
+            }
             rt.localScale = Vector3.one;
         }
     }

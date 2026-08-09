@@ -36,3 +36,44 @@ MonoBehaviour:
     Illustration: {fileID: 4187401580529671281, guid: 48ff46ea6b116485ba35ae3841275a6b, type: 3}
   - CardId: C42
     Illustration: {fileID: -3301713023109156932, guid: a65283187373a4355af3f193976b1900, type: 3}
+  cardImages:
+  - CardId: C02
+    Illustration: {fileID: -7020459517940450217, guid: 6b1a31162d0fece4abe2bd91771dbf2c, type: 3}
+  - CardId: C03
+    Illustration: {fileID: 5864724179353120237, guid: 6ee9761b297a77c4b86fdf172fe069d5, type: 3}
+  - CardId: C04
+    Illustration: {fileID: -6362208756149970175, guid: e8fa393345792ee44b783b2c55833e52, type: 3}
+  - CardId: C05
+    Illustration: {fileID: -7993787915207167350, guid: ef04da8323c280448ab286ccc7d9b538, type: 3}
+  - CardId: C07
+    Illustration: {fileID: -3899083432701289967, guid: 97fbf23178d70ba42a622e6d79e8ce97, type: 3}
+  - CardId: C12
+    Illustration: {fileID: -4597508861646393658, guid: 41d61e4cb306a53428f144b6f9d00d66, type: 3}
+  - CardId: C14
+    Illustration: {fileID: 1773220326435110936, guid: 4518f2f127e551141ac1dfc4f6839a6a, type: 3}
+  - CardId: C15
+    Illustration: {fileID: 9126636774574794379, guid: fa997f63ea35b4e41853c900dca90cbb, type: 3}
+  - CardId: C16
+    Illustration: {fileID: 1368904243644001050, guid: 9e629bb6e55131c4ea0eb3bad2aa46b6, type: 3}
+  - CardId: C19
+    Illustration: {fileID: 2720760094039001749, guid: 57588a9b779d3fb4f9b7a6ee46daf9a2, type: 3}
+  - CardId: C21
+    Illustration: {fileID: 5626670364310472302, guid: fcb3460b1583d6f439c865ac61078b7b, type: 3}
+  - CardId: C22
+    Illustration: {fileID: -5220015132998550923, guid: 121f9177b768b7c4d8529651652540cd, type: 3}
+  - CardId: C24
+    Illustration: {fileID: 848056902691126196, guid: c53caaeaba6217b4487ba1c177b31b0b, type: 3}
+  - CardId: C25
+    Illustration: {fileID: -3581571153033790751, guid: 9f158aa1cd1e0464fbb9106150a9b9c7, type: 3}
+  - CardId: C29
+    Illustration: {fileID: -4103957429704840772, guid: 3c5ecacb8266ab649abf0d0940263af1, type: 3}
+  - CardId: C30
+    Illustration: {fileID: 2071439621997167538, guid: 5de266f6b060b7d4f9f361f0c8670421, type: 3}
+  - CardId: C31
+    Illustration: {fileID: -2493953642071566370, guid: 413bfb8d97598f1409d002ed97598303, type: 3}
+  - CardId: C39
+    Illustration: {fileID: -4327753054976875953, guid: dfd7d6cd8d4a9c54a8639ab212b72589, type: 3}
+  - CardId: C41
+    Illustration: {fileID: 4187401580529671281, guid: 98ac40fd6c037294294ecef04db31379, type: 3}
+  - CardId: C42
+    Illustration: {fileID: -3301713023109156932, guid: c9c87943b25f7c1428252be0f26cdcef, type: 3}
